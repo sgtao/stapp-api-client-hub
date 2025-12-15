@@ -1,0 +1,13 @@
+# get_jp_wikipedia_abstract.yaml
+title: Wikipedia(JP)で用語（user_input_0）の概要を取得します
+session_state:
+  header_df:
+  - Property: Content-Type
+    Value: application/json
+  - Property: User-Agent
+    Value: CoolBot/0.0 (https://example.org/coolbot/; coolbot@example.org) requests/2.26.0
+  method: GET
+  req_body: null
+  uri: https://ja.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro&explaintext&redirects=1&titles=＜user_input_0＞
+  use_dynamic_inputs: true
+  user_property_path: query.pages.*.extract

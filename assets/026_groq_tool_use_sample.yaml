@@ -1,0 +1,73 @@
+# groq_tool_use_sample.yaml
+title: Groq tool use sample from Message
+note: |
+  - Grop API で`tools`プロパティ利用例 use `user_input_0` model
+  - `user_input_0`:
+    - `moonshotai/kimi-k2-instruct-0905`
+    - `openai/gpt-oss-20b`
+    - `openai/gpt-oss-120b`
+    - `meta-llama/llama-4-scout-17b-16e-instruct`
+    - `meta-llama/llama-4-maverick-17b-128e-instruct`
+    - `llama-3.3-70b-versatile`
+    - `llama-3.1-8b-instant`
+session_state:
+  header_df:
+  - Property: Content-Type
+    Value: application/json
+  - Property: Authorization
+    Value: Bearer ＜API_KEY＞
+  method: POST
+  req_body:
+    model: "＜user_input_0＞"
+    messages:
+      - role: system
+        content: |
+          あなたは知識豊富なアシスタントです。
+          条件に合致しないときのみ、ユーザーの要求に応じた回答をしてください。
+          ## 条件
+          - 専門用語はWikipediaで説明
+          - 一般的な検索はDuckDuckGoやGoogleで行い
+          - タスク依頼はタイトルを生成してください。
+    tools: 
+    - type: "function"
+      function: 
+        name: "wiki_search"
+        description: "Wikipediaから専門用語の説明を取得する"
+        parameters: 
+          type: "object"
+          properties: 
+            term: 
+              type: "string"
+              description: "Wikipediaで調べる専門用語"
+          required: 
+          - "term"
+    - type: "function"
+      function: 
+        name: "ddgo_search"
+        description: "DuckDuckGoやGoogleで一般検索を行う"
+        parameters: 
+          type: "object"
+          properties: 
+            queries: 
+              type: "array"
+              items: 
+                type: "string"
+              description: "検索するキーワード（最大5つ）"
+          required: 
+          - "queries"
+    - type: "function"
+      function: 
+        name: "create_task"
+        description: "タスクのタイトルを生成する"
+        parameters: 
+          type: "object"
+          properties: 
+            task_content: 
+              type: "string"
+              description: "実行したいタスクの内容"
+          required: 
+          - "task_content"
+    tool_choice: "auto"
+  uri: https://api.groq.com/openai/v1/chat/completions
+  use_dynamic_inputs: true
+  user_property_path: choices[0].message.tool_calls

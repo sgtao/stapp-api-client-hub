@@ -1,0 +1,15 @@
+# 020_groq_model_list.yaml
+title: Groq Model List
+note: |
+  - [Groq API のモデルリスト](https://console.groq.com/docs/models)を(GET)リクエストで取得します。
+session_state:
+  header_df:
+  - Property: Content-Type
+    Value: application/json
+  - Property: Authorization
+    Value: Bearer ＜API_KEY＞
+  method: GET
+  req_body: null
+  uri: https://api.groq.com/openai/v1/models
+  use_dynamic_inputs: true
+  user_property_path: data[*].id

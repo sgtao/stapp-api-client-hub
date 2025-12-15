@@ -1,0 +1,26 @@
+# groq_llama4_word_explain.yaml
+title: groq_llama4_word_explain
+note:
+  Grop API（llama-4-17b）へ用語（user_0）と補足（user_1）を使って解説します。
+  Note：User_Input増加し、`user_input_1`を準備してください。
+session_state:
+  header_df:
+  - Property: Content-Type
+    Value: application/json
+  - Property: Authorization
+    Value: Bearer ＜API_KEY＞
+  method: POST
+  req_body:
+    model: "meta-llama/llama-4-scout-17b-16e-instruct"
+    messages:
+      - role: "system"
+        content: "補足情報を記します。\n## 用語\n＜user_input_0＞\n## 補足情報\n＜user_input_1＞"
+      - role: "user"
+        content: "次の用語を解説してください。
+          ## 用語
+          ＜user_input_0＞
+          n## 方法
+          まず用語の概要を200文字以内で説明したあと、用例を5つ上げて説明してください。"
+  uri: https://api.groq.com/openai/v1/chat/completions
+  use_dynamic_inputs: false
+  user_property_path: choices[0].message.content

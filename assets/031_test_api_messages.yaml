@@ -1,0 +1,26 @@
+# test_api_messages.yaml
+title: test api messages using 024_groq_prompt_for_chatbot
+note: |
+  - Grop API config with `user_input_0` model has system prompt for chatbot app.
+  - From [Grop API models for chat](https://console.groq.com/docs/models), select one and input `user_input_0`. i.e.:
+    - `gemma2-9b-it`
+    - `llama-3.3-70b-versatile`
+    - `openai/gpt-oss-120b`
+session_state:
+  header_df:
+  - Property: Content-Type
+    Value: application/json
+  method: POST
+  req_body:
+    # model: "llama-3.3-70b-versatile"
+    config_file: assets/024_groq_prompt_for_chatbot.yaml
+    num_user_inputs: 1
+    user_inputs: 
+      user_input_0: "openai/gpt-oss-120b"
+    messages: 
+      - role: "system"
+        content: "あなたは聡明なAIです。
+          ユーザの入力に全て日本語で返答を生成してください"
+  uri: "http://localhost:3000/api/v0/messages"
+  use_dynamic_inputs: true
+  user_property_path: results

@@ -1,0 +1,24 @@
+# 035_test_echo-target.yaml
+title: test echo-target api
+note: |
+  - `echo_target` API （`target`から`response_path`を抽出するAPI）のテストファイル
+session_state:
+  header_df:
+  - Property: Content-Type
+    Value: application/json
+  method: POST
+  req_body:
+    target: 
+      messages: 
+      - role: "user"
+        content: "hello"
+      - role: "assistant"
+        content: "こんにちは！何かお手伝いできることがありますか？"
+      - role: "user"
+        content: "どんな手伝いができますか？"
+      - role: "assistant"
+        content: "もちろんです！以下は、私がサポートできる主な分野です。"
+    response_path: "messages[-1].content"
+  uri: http://localhost:3000/api/v0/echo_target
+  use_dynamic_inputs: true
+  user_property_path: 'results'

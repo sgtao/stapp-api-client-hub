@@ -1,0 +1,16 @@
+# 033_test_get-config-title.yaml
+title: for test, get-config-title of user_input_0 confgi flle.
+note: |
+  - config-title API で、指定された設定ファイルのタイトルを取得します
+  - `user_input_0`: config file path
+session_state:
+  header_df:
+  - Property: Content-Type
+    Value: application/json
+  method: POST
+  uri: http://localhost:3000/api/v0/config-title
+  req_body:
+    # config_file: assets/250815-01_get-config-title.yaml
+    config_file: "＜user_input_0＞"
+  use_dynamic_inputs: true
+  user_property_path: results.title

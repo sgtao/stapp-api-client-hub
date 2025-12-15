@@ -1,0 +1,26 @@
+# groq_prompt_for_chatbot.yaml
+title: groq system prompt for chatbot app
+note: |
+  - Grop API config with `user_input_0` model has system prompt for chatbot app.
+  - From [Grop API models for chat](https://console.groq.com/docs/models), select one and input `user_input_0`. i.e.:
+    - `openai/gpt-oss-120b`
+    - `meta-llama/llama-4-scout-17b-16e-instruct`
+    - `gemma2-9b-it`
+    - `llama-3.3-70b-versatile`
+session_state:
+  header_df:
+  - Property: Content-Type
+    Value: application/json
+  - Property: Authorization
+    Value: Bearer ＜API_KEY＞
+  method: POST
+  req_body:
+    # model: "llama-3.3-70b-versatile"
+    model: "＜user_input_0＞"
+    messages: 
+      - role: "system"
+        content: "あなたは聡明なAIです。
+          ユーザの入力に全て日本語で返答を生成してください"
+  uri: https://api.groq.com/openai/v1/chat/completions
+  use_dynamic_inputs: true
+  user_property_path: choices[0].message.content
