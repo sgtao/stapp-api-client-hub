@@ -39,7 +39,7 @@ def initial_session_state():
         st.session_state.selected_config = ""
 
 
-def start_api_server(port):
+def start_api_server(port, use_package=False):
     """
     FastAPIサーバーをバックグラウンドで起動します。
     """
@@ -50,7 +50,12 @@ def start_api_server(port):
 
         # APIサーバーを起動し、プロセスをセッション状態に保存
         # command = ["python", "api_server.py", "--port", str(port)]
-        command = ["python", SUBPROCESS_PROG, "--port", str(port)]
+        # command = ["python", SUBPROCESS_PROG, "--port", str(port)]
+        if use_package:
+            SUBPROCESS_PROG = "dist/api_server/api_server"
+        else:
+            SUBPROCESS_PROG = f"python {SUBPROCESS_PROG}"
+        command = [SUBPROCESS_PROG, "--port", str(port)]
         st.session_state.api_process = subprocess.Popen(
             command, start_new_session=True
         )
@@ -302,11 +307,12 @@ def main():
     # APIサーバーの起動・停止ボタン
     cols = st.columns(2)
     with cols[0]:
+        _use_package = st.toggle("Use packaged api-server", value=False)
         if st.button(
             label="Run API Service",
             disabled=(st.session_state.api_process is not None),
         ):
-            start_api_server(port)
+            start_api_server(port, _use_package)
     with cols[1]:
         if st.button(
             label="Stop API Service",
