@@ -57,6 +57,8 @@ docker-run = { cmd = "docker run -p 8051:8051 my-stapp", help = "run Docker cont
 
 # make distribution package
 rm-dist = { cmd = "rm -rf build dist", help = "remove build and dist directory" }
-build = { cmd = "pyinstaller run_stapp.spec --clean", help = "build distribution package" }
+build_stapp = { cmd = "pyinstaller run_stapp.spec --clean", help = "build stapp dist. package" }
+build_server = { cmd = "pyinstaller api_server.spec --clean", help = "build api_server dist. package" }
+build = { cmd = "task build_server && task build_stapp", help = "build distribution package" }
 copy-to-dist = { cmd = "cp -r src .streamlit hooks dist/run_stapp/.", help = "copy additional files to dist" }
 make-dist = { cmd = "task rm-dist && task build && task copy-to-dist", help = "make distribution package" }
