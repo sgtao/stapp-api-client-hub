@@ -21,7 +21,6 @@ st.set_page_config(
 )
 
 APP_TITLE = "API Server Control"
-# SUBPROCESS_PROG = "src/services/api_server.py"
 SUBPROCESS_PROG = "src/api_server.py"
 
 
@@ -50,12 +49,11 @@ def start_api_server(port, use_package=False):
 
         # APIサーバーを起動し、プロセスをセッション状態に保存
         # command = ["python", "api_server.py", "--port", str(port)]
-        # command = ["python", SUBPROCESS_PROG, "--port", str(port)]
+        command = ["python", SUBPROCESS_PROG, "--port", str(port)]
         if use_package:
-            SUBPROCESS_PROG = "dist/api_server/api_server"
-        else:
-            SUBPROCESS_PROG = f"python {SUBPROCESS_PROG}"
-        command = [SUBPROCESS_PROG, "--port", str(port)]
+            package_prog = "dist/api_server/api_server"
+            command = [package_prog, "--port", str(port)]
+
         st.session_state.api_process = subprocess.Popen(
             command, start_new_session=True
         )
