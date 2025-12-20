@@ -14,7 +14,7 @@ streamlit_data = collect_data_files("streamlit")
 
 # Analysis: アプリケーションの依存関係を分析
 a = Analysis(
-    ["api_server.py"],  # エントリーポイント
+    ["src/api_server.py"],  # エントリーポイント
     pathex=[],  # Pythonのインポートパス
     binaries=[],  # 必要なバイナリファイル
     datas=[
