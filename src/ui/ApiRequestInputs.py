@@ -5,7 +5,7 @@ METHODS = ["GET", "POST", "PUT", "DELETE"]
 
 
 class ApiRequestInputs:
-    def __init__(self, method=None, uri=None, body=None):
+    def __init__(self, method=None, api_origin=None, uri=None, body=None):
         # Method, URI, RequestBodyの初期化
         if "method" not in st.session_state:
             # st.session_state.method = "GET"
@@ -13,11 +13,16 @@ class ApiRequestInputs:
                 st.session_state.method = method
             else:
                 st.session_state.method = METHODS[0]
+        if "api_origin" not in st.session_state:
+            if api_origin is not None:
+                st.session_state.api_origin = api_origin
+            else:
+                st.session_state.api_origin = "http://localhost:3000"
         if "uri" not in st.session_state:
             if uri is not None:
                 st.session_state.uri = uri
             else:
-                st.session_state.uri = "https://dummyjson.com/products/1"
+                st.session_state.uri = self.make_uri("/api/v0/hello")
         if "req_body" not in st.session_state:
             st.session_state.req_body = "{}"
             if body is not None:
@@ -45,8 +50,20 @@ class ApiRequestInputs:
     def get_method(self):
         return st.session_state.method
 
+    def get_api_origin(self):
+        return st.session_state.api_origin
+
     def get_uri(self):
         return st.session_state.uri
+
+    def make_uri(self, path, origin=None):
+        if "api_origin" in st.session_state:
+            return st.session_state.api_origin + path
+        else:
+            if origin is not None:
+                return path
+            else:
+                return origin + path
 
     def get_req_body(self):
         return st.session_state.req_body

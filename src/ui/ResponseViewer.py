@@ -27,11 +27,14 @@ class ResponseViewer:
         else:
             return "unsupported"
 
-    def extract_response_value(self, response):
+    def extract_response_value(self, response, path=None):
         try:
             content_type = self.response_content(response)
             # 抽出したいプロパティの指定
-            property_path = st.session_state.user_property_path
+            if path is None:
+                property_path = st.session_state.user_property_path
+            else:
+                property_path = path
 
             if content_type == "application/json":
                 response_json = response.json()  # JSON形式の場合

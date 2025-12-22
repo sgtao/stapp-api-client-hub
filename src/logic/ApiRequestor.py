@@ -77,6 +77,40 @@ class ApiRequestor:
             self.api_logger.error_log(f"An unexpected error occurred: {e}")
             raise
 
+    def send_api_request(
+        self,
+        uri,
+        method,
+        config_file,
+        num_inputs=0,
+        user_inputs=None,
+        messages=None,
+    ):
+        """
+        API呼び出しの高レベルラッパー関数
+        :param uri: APIエンドポイント
+        :param method: HTTPメソッド
+        :param config_file: 設定ファイルパス
+        :param num_inputs: ユーザー入力の数
+        :param user_inputs: ユーザー入力 {user_input_0: "xxx", ...}
+        :param messages: メッセージリスト [{"role": "user", "content": "..."}, ...]
+        :return: レスポンスオブジェクト
+        """
+        if not config_file:
+            raise ValueError("config_file must be specified")
+
+        headers = {"Content-Type": "application/json"}
+        body = {
+            "config_file": config_file,
+            "num_user_inputs": num_inputs,
+            "user_inputs": user_inputs or {},
+            "messages": messages or [],
+        }
+
+        response = self.send_request(uri, method, headers, body)
+        response.raise_for_status()
+        return response
+
     def replace_uri(self, session_state, uri):
         replaced_uri = uri
         for i in range(session_state["num_inputs"]):

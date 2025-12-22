@@ -1,4 +1,4 @@
-# service_controller.py
+# single_controller.py
 # import json
 
 from fastapi import APIRouter, Request, HTTPException
@@ -38,8 +38,8 @@ async def send_api_request(url, method, headers, req_body, response_path=None):
     return {"results": result}
 
 
-@router.post("/service")
-async def execute_service(request: Request):
+@router.post("/single")
+async def single_controller(request: Request):
     """
     リクエストを受け取り、config_file で指定したAPIを実行し、
     JSON形式で`{"results": [user_property value]}`を返します。
