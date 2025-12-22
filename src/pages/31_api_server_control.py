@@ -38,6 +38,125 @@ def initial_session_state():
         st.session_state.selected_config = ""
 
 
+class ProcessInfo:
+    def __init__(self, server_id: str, process, port: int):
+        self.server_id = server_id
+        self.process = process
+        self.port = port
+        self.start_time = time.time()
+
+
+class ProcessManager:
+    def __init__(self):
+        self.servers: dict[str, ProcessInfo] = {}
+        self.num_server = 0
+        if "servers" not in st.session_state:
+            st.session_state.servers = {}
+        else:
+            self.servers = st.session_state.servers
+
+    # def start_server(self, server_id: str, port: int, use_package=False):
+    def start_server(self, port: int, use_package=False):
+        """
+        FastAPIサーバーをバックグラウンドで起動します。
+        """
+        # if server_id in self.servers:
+        #     raise ValueError(f"Server '{server_id}' already exists")
+        # --- port 重複チェック ---
+        self.num_server = 0
+        for info in self.servers.values():
+            if port == info.port:
+                raise ValueError(f"Port {port} is already in use")
+            self.num_server += 1
+
+        # --- server_id 自動採番 ---
+        server_id = f"sid{self.num_server:04d}"
+
+        try:
+            # APIサーバーを起動し、プロセスをセッション状態に保存
+            # command = ["python", "api_server.py", "--port", str(port)]
+            command = ["python", SUBPROCESS_PROG, "--port", str(port)]
+            if use_package:
+                package_prog = "dist/api_server/api_server"
+                command = [package_prog, "--port", str(port)]
+
+            process = self.launch_local(command)
+
+            self.servers[server_id] = ProcessInfo(server_id, process, port)
+            st.session_state.servers = self.servers
+            st.success(f"API Server started on port {port}")
+            return True
+        except Exception as e:
+            st.error(f"API Server failed to start: {e}")
+
+    def stop_server(self, server_id: str):
+        info = self.servers.get(server_id)
+        if not info:
+            raise ValueError(f"Server '{server_id}' has no info")
+            # return False
+
+        info.process.terminate()
+        info.process.wait()
+        del self.servers[server_id]
+        st.session_state.servers = self.servers
+        return True
+
+    def get_status(self, server_id: str):
+        info = self.servers.get(server_id)
+        if not info:
+            return None
+        return {
+            "server_id": server_id,
+            "running": info.process.poll() is None,
+            "port": info.port,
+            "uptime": time.time() - info.start_time,
+        }
+
+    def list_servers(self):
+        return {sid: self.get_status(sid) for sid in self.servers.keys()}
+
+    def launch_local(self, command) -> int:
+        process = subprocess.Popen(
+            command,
+            # stdout=subprocess.PIPE,
+            # stderr=subprocess.PIPE,
+            start_new_session=True,
+        )
+        print(f"start local (pid: {process})")
+        return process
+
+    def stop_local(self, pid):
+        """
+        バックグラウンドで実行中のFastAPIサーバーを停止します。
+        """
+        if st.session_state.api_process:
+            try:
+                # Windows環境とLinux環境でプロセス停止処理を場合分け
+                if os.name == "nt":
+                    # Windows: taskkillを使用
+                    subprocess.run(
+                        [
+                            "taskkill",
+                            "/F",
+                            "/PID",
+                            str(st.session_state.api_process.pid),
+                        ]
+                    )
+                else:
+                    # Linux, macOS: プロセスグループにSIGTERMを送信
+                    os.killpg(
+                        os.getpgid(st.session_state.api_process.pid),
+                        signal.SIGTERM,
+                    )
+
+                st.session_state.api_process = None  # プロセスをリセット
+                st.success("API Server stopped.")
+            except Exception as e:
+                st.error(f"Failed to stop API Server: {e}")
+        else:
+            st.warning("API Server is not running.")
+
+
 def start_api_server(port, use_package=False):
     """
     FastAPIサーバーをバックグラウンドで起動します。
@@ -288,6 +407,7 @@ def test_post_service(port, config_file="assets/001_get_simple_api_test.yaml"):
 
 
 def main():
+    pm = ProcessManager()
     # UI
     st.page_link("main.py", label="Back to Home", icon="🏠")
 
@@ -310,14 +430,25 @@ def main():
             label="Run API Service",
             disabled=(st.session_state.api_process is not None),
         ):
-            start_api_server(port, _use_package)
+            # start_api_server(port, _use_package)
+            pm.start_server(port=port, use_package=_use_package)
+            st.rerun()
     with cols[1]:
-        if st.button(
-            label="Stop API Service",
-            disabled=(st.session_state.api_process is None),
-            help="Click twice is better.",
+        pass
+
+    for server_id in pm.list_servers():
+        # st.write(pm.get_status(server_id))
+        info = pm.get_status(server_id)
+        with st.expander(
+            # label=f"{server_id}: port {info['port']}", key=f"exp_{server_id}"
+            label=f"{server_id}: port {info['port']}"
         ):
-            stop_api_server()
+            if st.button(
+                label=f"Stop Process of port:{info['port']}",
+                key=f"stop_{server_id}",
+            ):
+                pm.stop_server(server_id)
+                st.rerun()
 
     # API接続テストボタン
     if st.session_state.api_process:
