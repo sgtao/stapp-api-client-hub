@@ -1,17 +1,19 @@
 # api_server_control.py
 # import json
-import os
+# import os
 import requests
 import time
 
 import streamlit as st
-import subprocess
-import signal
+
+# import subprocess
+# import signal
 
 from ui.SideMenus import SideMenus
 from ui.ResponseViewer import ResponseViewer
 from logic.ApiRequestor import ApiRequestor
 from logic.AppLogger import AppLogger
+from logic.ProcessManager import ProcessManager
 
 
 # ページ設定
@@ -21,7 +23,6 @@ st.set_page_config(
 )
 
 APP_TITLE = "API Server Control"
-SUBPROCESS_PROG = "src/api_server.py"
 
 
 def initial_session_state():
@@ -36,182 +37,8 @@ def initial_session_state():
         st.session_state.config_files = []
     if "selected_config" not in st.session_state:
         st.session_state.selected_config = ""
-
-
-class ProcessInfo:
-    def __init__(self, server_id: str, process, port: int):
-        self.server_id = server_id
-        self.process = process
-        self.port = port
-        self.start_time = time.time()
-
-
-class ProcessManager:
-    def __init__(self):
-        self.servers: dict[str, ProcessInfo] = {}
-        self.num_server = 0
-        if "servers" not in st.session_state:
-            st.session_state.servers = {}
-        else:
-            self.servers = st.session_state.servers
-
-    # def start_server(self, server_id: str, port: int, use_package=False):
-    def start_server(self, port: int, use_package=False):
-        """
-        FastAPIサーバーをバックグラウンドで起動します。
-        """
-        # if server_id in self.servers:
-        #     raise ValueError(f"Server '{server_id}' already exists")
-        # --- port 重複チェック ---
-        self.num_server = 0
-        for info in self.servers.values():
-            if port == info.port:
-                raise ValueError(f"Port {port} is already in use")
-            self.num_server += 1
-
-        # --- server_id 自動採番 ---
-        server_id = f"sid{self.num_server:04d}"
-
-        try:
-            # APIサーバーを起動し、プロセスをセッション状態に保存
-            # command = ["python", "api_server.py", "--port", str(port)]
-            command = ["python", SUBPROCESS_PROG, "--port", str(port)]
-            if use_package:
-                package_prog = "dist/api_server/api_server"
-                command = [package_prog, "--port", str(port)]
-
-            process = self.launch_local(command)
-
-            self.servers[server_id] = ProcessInfo(server_id, process, port)
-            st.session_state.servers = self.servers
-            st.success(f"API Server started on port {port}")
-            return True
-        except Exception as e:
-            st.error(f"API Server failed to start: {e}")
-
-    def stop_server(self, server_id: str):
-        info = self.servers.get(server_id)
-        if not info:
-            raise ValueError(f"Server '{server_id}' has no info")
-            # return False
-
-        info.process.terminate()
-        info.process.wait()
-        del self.servers[server_id]
-        st.session_state.servers = self.servers
-        return True
-
-    def get_status(self, server_id: str):
-        info = self.servers.get(server_id)
-        if not info:
-            return None
-        return {
-            "server_id": server_id,
-            "running": info.process.poll() is None,
-            "port": info.port,
-            "uptime": time.time() - info.start_time,
-        }
-
-    def list_servers(self):
-        return {sid: self.get_status(sid) for sid in self.servers.keys()}
-
-    def launch_local(self, command) -> int:
-        process = subprocess.Popen(
-            command,
-            # stdout=subprocess.PIPE,
-            # stderr=subprocess.PIPE,
-            start_new_session=True,
-        )
-        print(f"start local (pid: {process})")
-        return process
-
-    def stop_local(self, pid):
-        """
-        バックグラウンドで実行中のFastAPIサーバーを停止します。
-        """
-        if st.session_state.api_process:
-            try:
-                # Windows環境とLinux環境でプロセス停止処理を場合分け
-                if os.name == "nt":
-                    # Windows: taskkillを使用
-                    subprocess.run(
-                        [
-                            "taskkill",
-                            "/F",
-                            "/PID",
-                            str(st.session_state.api_process.pid),
-                        ]
-                    )
-                else:
-                    # Linux, macOS: プロセスグループにSIGTERMを送信
-                    os.killpg(
-                        os.getpgid(st.session_state.api_process.pid),
-                        signal.SIGTERM,
-                    )
-
-                st.session_state.api_process = None  # プロセスをリセット
-                st.success("API Server stopped.")
-            except Exception as e:
-                st.error(f"Failed to stop API Server: {e}")
-        else:
-            st.warning("API Server is not running.")
-
-
-def start_api_server(port, use_package=False):
-    """
-    FastAPIサーバーをバックグラウンドで起動します。
-    """
-    try:
-        # 既存のAPIサーバーが実行中の場合は停止
-        if st.session_state.api_process:
-            stop_api_server()
-
-        # APIサーバーを起動し、プロセスをセッション状態に保存
-        # command = ["python", "api_server.py", "--port", str(port)]
-        command = ["python", SUBPROCESS_PROG, "--port", str(port)]
-        if use_package:
-            package_prog = "dist/api_server/api_server"
-            command = [package_prog, "--port", str(port)]
-
-        st.session_state.api_process = subprocess.Popen(
-            command, start_new_session=True
-        )
-        st.session_state.port_number = port
-        st.success(f"API Server started on port {port}")
-    except Exception as e:
-        st.error(f"API Server failed to start: {e}")
-
-
-def stop_api_server():
-    """
-    バックグラウンドで実行中のFastAPIサーバーを停止します。
-    """
-    if st.session_state.api_process:
-        try:
-            # Windows環境とLinux環境でプロセス停止処理を場合分け
-            if os.name == "nt":
-                # Windows: taskkillを使用
-                subprocess.run(
-                    [
-                        "taskkill",
-                        "/F",
-                        "/PID",
-                        str(st.session_state.api_process.pid),
-                    ]
-                )
-            else:
-                # Linux, macOS: プロセスグループにSIGTERMを送信
-                os.killpg(
-                    os.getpgid(st.session_state.api_process.pid),
-                    signal.SIGTERM,
-                )
-
-            st.session_state.api_process = None  # プロセスをリセット
-            st.success("API Server stopped.")
-        except Exception as e:
-            st.error(f"Failed to stop API Server: {e}")
-    else:
-        st.warning("API Server is not running.")
+    if "servers" not in st.session_state:
+        st.session_state.servers = {}
 
 
 def test_api_hello(port):
@@ -224,21 +51,20 @@ def test_api_hello(port):
         "Content-Type": "application/json",
     }
     try:
-        if st.button("Test API (hello)"):
-            # response = requests.get(uri)
-            api_requestor = ApiRequestor()
-            response = api_requestor.send_request(
-                uri,
-                method,
-                header_dict,
-            )
-            response.raise_for_status()  # HTTPエラーをチェック
-            st.success(
-                f"""
-                Successfully connected to API Server on port {port}.
-                """
-            )
-            return response
+        # response = requests.get(uri)
+        api_requestor = ApiRequestor()
+        response = api_requestor.send_request(
+            uri,
+            method,
+            header_dict,
+        )
+        response.raise_for_status()  # HTTPエラーをチェック
+        st.success(
+            f"""
+            Successfully connected to API Server on port {port}.
+            """
+        )
+        return response
     except requests.exceptions.RequestException as e:
         st.error(f"Failed to connect to API Server: {e}")
 
@@ -253,24 +79,24 @@ def test_get_config_files(port):
         "Content-Type": "application/json",
     }
     try:
-        if st.button("Test Configs(get list)"):
-            # response = requests.get(uri)
-            api_requestor = ApiRequestor()
-            response = api_requestor.send_request(
-                uri,
-                method,
-                header_dict,
-            )
-            response.raise_for_status()  # HTTPエラーをチェック
-            st.success(
-                f"""
-                Successfully connected to API Server on port {port}.
-                """
-            )
-            # st.write(response.json())
-            response_json = response.json()
-            st.session_state.config_files = response_json.get("results")
-            return response
+        # if st.button("Test Configs(get list)"):
+        # response = requests.get(uri)
+        api_requestor = ApiRequestor()
+        response = api_requestor.send_request(
+            uri,
+            method,
+            header_dict,
+        )
+        response.raise_for_status()  # HTTPエラーをチェック
+        st.success(
+            f"""
+            Successfully connected to API Server on port {port}.
+            """
+        )
+        # st.write(response.json())
+        response_json = response.json()
+        st.session_state.config_files = response_json.get("results")
+        return response
     except requests.exceptions.RequestException as e:
         st.error(f"Failed to connect to API Server: {e}")
 
@@ -408,6 +234,7 @@ def test_post_service(port, config_file="assets/001_get_simple_api_test.yaml"):
 
 def main():
     pm = ProcessManager()
+    pm.set_servers(st.session_state.servers)
     # UI
     st.page_link("main.py", label="Back to Home", icon="🏠")
 
@@ -415,7 +242,7 @@ def main():
 
     # ポート番号の入力
     port = st.number_input(
-        "Port Number",
+        "Base Port Number",
         min_value=1024,
         max_value=65535,
         value=st.session_state.port_number,
@@ -423,70 +250,99 @@ def main():
     )
 
     # APIサーバーの起動・停止ボタン
-    cols = st.columns(2)
+    cols = st.columns(3)
     with cols[0]:
+        if st.button("Rerun (`R`)", icon="🔃"):
+            st.rerun()
+    with cols[1]:
         _use_package = st.toggle("Use packaged api-server", value=False)
+    with cols[2]:
         if st.button(
-            label="Run API Service",
+            label=f"Run api-server({port})",
             disabled=(st.session_state.api_process is not None),
+            type="primary",
+            icon="🚀",
         ):
             # start_api_server(port, _use_package)
             pm.start_server(port=port, use_package=_use_package)
+            st.session_state.servers = pm.get_servers()
             st.rerun()
-    with cols[1]:
-        pass
 
-    for server_id in pm.list_servers():
+    # 起動プロセス
+    st.divider()
+    pm_list_servers = pm.list_servers()
+    if len(pm_list_servers) <= 0:
+        return
+
+    st.subheader("launched Processes")
+    response = None
+    for server_id in pm_list_servers:  # pm.list_servers():
         # st.write(pm.get_status(server_id))
         info = pm.get_status(server_id)
         with st.expander(
             # label=f"{server_id}: port {info['port']}", key=f"exp_{server_id}"
             label=f"{server_id}: port {info['port']}"
         ):
-            if st.button(
-                label=f"Stop Process of port:{info['port']}",
-                key=f"stop_{server_id}",
-            ):
-                pm.stop_server(server_id)
-                st.rerun()
-
-    # API接続テストボタン
-    if st.session_state.api_process:
-        # instantiation
-        response_viewer = ResponseViewer("results")
-        try:
-            st.subheader("Test API Server")
-            col1, col2 = st.columns(2)
-            response = None
-            with col1:
-                if response is None:
-                    response = test_api_hello(port)
-                if response is None:
-                    response = test_get_config_files(port)
-                if response is None:
-                    if st.button("Test Service(post config)"):
-                        # response = test_post_service(port)
-                        modal_post_service(
-                            port=port,
-                            config_files=st.session_state.config_files,
-                        )
-            with col2:
-                if st.button("Rerun (`R`)", icon="🏃"):
+            cols = st.columns(3)
+            with cols[0]:
+                if st.button(
+                    label="Test Hello", key=f"hello_{server_id}", icon="🖐"
+                ):
+                    response = test_api_hello(info["port"])
+            with cols[1]:
+                if st.button(
+                    "Get Config list",
+                    key=f"config_list_{server_id}",
+                    icon="📑",
+                ):
+                    response = test_get_config_files(info["port"])
+            with cols[2]:
+                if st.button(
+                    label="Stop Process",
+                    key=f"stop_{server_id}",
+                    icon="🛑",
+                ):
+                    pm.stop_server(server_id)
                     st.rerun()
 
-            st.subheader("レスポンス")
-            # st.write(response)
-            # st.write(st.session_state.response)
-            if response is not None:
-                response_viewer.render_viewer(response)
-                st.session_state.response = response
-            elif st.session_state.response is not None:
-                response_viewer.render_viewer(st.session_state.response)
-            else:
-                st.info("You can access to API Server via Test Buttons")
+    # API接続テストレスポンス
+    st.divider()
+    # if st.session_state.api_process:
+    # instantiation
+    response_viewer = ResponseViewer("results")
+    try:
+        # st.subheader("Test API Server")
+        # col1, col2 = st.columns(2)
+        # response = None
+        # with col1:
+        #     if response is None:
+        #         response = test_api_hello(port)
+        #     if response is None:
+        #         response = test_get_config_files(port)
+        #     if response is None:
+        #         if st.button("Test Service(post config)"):
+        #             # response = test_post_service(port)
+        #             modal_post_service(
+        #                 port=port,
+        #                 config_files=st.session_state.config_files,
+        #             )
+        # with col2:
+        #     if st.button("Rerun (`R`)", icon="🏃"):
+        #         st.rerun()
 
-        except Exception as e:
-            st.error(f"Failed to connect to API Server: {e}")
+        st.subheader("Response:")
+        # st.write(response)
+        # st.write(st.session_state.response)
+        if response is not None:
+            response_viewer.render_viewer(response)
+            st.session_state.response = response
+        elif st.session_state.response is not None:
+            response_viewer.render_viewer(st.session_state.response)
+        else:
+            st.info("You can access to API Server via Test Buttons")
+
+    except Exception as e:
+        st.error(f"Failed to connect to API Server: {e}")
 
 
 if __name__ == "__main__":
