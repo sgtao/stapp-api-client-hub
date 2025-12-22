@@ -32,3 +32,8 @@ st.page_link(
     label="Go to control page of api server",
     icon="⚙️",
 )
+st.page_link(
+    "pages/41_serviced_api_client.py",
+    label="Go to Serviced API Client page",
+    icon="🧪",
+)
