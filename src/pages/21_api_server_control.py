@@ -281,7 +281,8 @@ def main():
         info = pm.get_status(server_id)
         with st.expander(
             # label=f"{server_id}: port {info['port']}", key=f"exp_{server_id}"
-            label=f"{server_id}: port {info['port']}"
+            label=f"{server_id}: port {info['port']}",
+            expanded=True,
         ):
             cols = st.columns(3)
             with cols[0]:

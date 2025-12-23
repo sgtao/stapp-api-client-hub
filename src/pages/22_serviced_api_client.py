@@ -112,5 +112,6 @@ if __name__ == "__main__":
     app_logger = AppLogger(APP_TITLE)
     app_logger.app_start()
     side_menus = SideMenus()
+    side_menus.set_user_property_path("results")
     side_menus.render_api_client_menu()
     main()
