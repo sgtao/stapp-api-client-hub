@@ -255,7 +255,7 @@ class ClientController:
         with col4:
             if st.button(
                 help="Clear Session States",
-                label="🔄",
+                label="🛀",
             ):
                 # 全てのセッション状態をクリアする場合はこちらを使用
                 st.session_state.clear()
