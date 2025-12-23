@@ -24,7 +24,7 @@ def initial_session_state():
 def main():
     st.page_link("main.py", label="Back to Home", icon="🏠")
 
-    st.title(f"🧪 {APP_TITLE}")
+    st.title(f"🙏 {APP_TITLE}")
     # インスタンス化
     request_inputs = ApiRequestInputs(api_origin="http://localhost:3000")
     response_viewer = ResponseViewer()

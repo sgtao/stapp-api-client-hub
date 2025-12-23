@@ -23,17 +23,18 @@ st.page_link(
     label="Go to ChatBot with config App",
     icon="💬",
 )
-# ログ表示ページへのリンク
-st.page_link("pages/21_logs_viewer.py", label="View Logs", icon="📄")
 
 # API Serverページへのリンク
 st.page_link(
-    "pages/31_api_server_control.py",
+    "pages/21_api_server_control.py",
     label="Go to control page of api server",
     icon="⚙️",
 )
 st.page_link(
-    "pages/41_serviced_api_client.py",
+    "pages/22_serviced_api_client.py",
     label="Go to Serviced API Client page",
-    icon="🧪",
+    icon="🙏",
 )
+
+# ログ表示ページへのリンク
+st.page_link("pages/91_logs_viewer.py", label="View Logs", icon="📄")
