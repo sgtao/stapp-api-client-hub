@@ -89,8 +89,12 @@ class ProcessManager:
         return {sid: self.get_status(sid) for sid in self.servers.keys()}
 
     def launch_local(self, command) -> int:
+        env = os.environ.copy()
+        env["API_KEY"] = os.getenv("API_KEY")
+
         process = subprocess.Popen(
             command,
+            env=env,
             # stdout=subprocess.PIPE,
             # stderr=subprocess.PIPE,
             start_new_session=True,
