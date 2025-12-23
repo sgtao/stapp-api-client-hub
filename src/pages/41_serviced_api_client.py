@@ -66,10 +66,10 @@ def main():
                         st.rerun()
                 with col2:
                     if st.button(
-                        "Request service", type="secondary", icon="🚀"
+                        "Request single", type="secondary", icon="🚀"
                     ):
                         # APIリクエスト送信
-                        uri = request_inputs.make_uri(path="/api/v0/service")
+                        uri = request_inputs.make_uri(path="/api/v0/single")
                         api_response = api_client.post_api_server(
                             uri=uri,
                             config_file=st.session_state.config_file,
