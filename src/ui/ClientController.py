@@ -262,3 +262,16 @@ class ClientController:
                 st.rerun()
         with col5:
             pass
+
+    # def set_action_config(self, config, index=0):
+    def set_action_configs(self, config):
+        st.session_state.action_configs = []
+        _action_states = config.get("action_state", [])
+        if len(_action_states) <= 0:
+            raise "Action State not defined!"
+        for index in range(len(_action_states)):
+            _cfg_action_state = _action_states[index]
+            st.session_state.action_configs.append(_cfg_action_state)
+
+    def get_action_config(self, index=0):
+        return st.session_state.action_configs[index]

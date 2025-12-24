@@ -6,6 +6,7 @@ import streamlit as st
 from ui.ApiRequestHeader import ApiRequestHeader
 from ui.ApiRequestInputs import ApiRequestInputs
 from ui.ChatMessage import ChatMessage
+from ui.ChatModal import ChatModal
 from ui.ClientController import ClientController
 from ui.ConfigFiles import ConfigFiles
 
@@ -111,55 +112,75 @@ def main():
         pass
 
     # Chat with Config
-    message.display_chat_history()
+    with st.container(height="stretch"):
+        message.display_chat_history()
 
-    user_input = st.chat_input(
-        placeholder="After load config, Submit any message",
-        disabled=not st.session_state.config_loaded,
-    )
-    if user_input:
-        # get response from LlmAPI
-        if api_request_inputs.get_method() == "GET":
-            st.warning(
-                "GETメソッドは、リクエストボディを送信しません。"
-                "リクエストヘッダーとURIのみが使用されます。"
+        user_input = st.chat_input(
+            placeholder="After load config, Submit any message",
+            disabled=not st.session_state.config_loaded,
+        )
+        if user_input:
+            # get response from LlmAPI
+            if api_request_inputs.get_method() == "GET":
+                st.warning(
+                    "GETメソッドは、リクエストボディを送信しません。"
+                    "リクエストヘッダーとURIのみが使用されます。"
+                )
+                time.sleep(3)
+                st.rerun()
+
+            message.add("user", user_input)
+            uri = api_request_inputs.get_uri()
+            header_dict = request_header.get_header_dict()
+            request_body = api_request_inputs.get_req_body()
+            # URIとリクエストボディのJSON形式検証
+
+            try:
+                user_property_path = st.session_state.user_property_path
+                llm = LlmAPI(
+                    # uri=sent_uri,
+                    uri=uri,
+                    header_dict=header_dict,
+                    # req_body=req_body,
+                    req_body=request_body,
+                    # user_property_path=st.session_state.user_property_path,
+                    user_property_path=user_property_path,
+                )
+
+                # replace llm request
+                if st.session_state.use_dynamic_inputs:
+                    llm.prepare_dynamic_request(st.session_state)
+
+                # send message:
+                response = llm.single_response(message.get_messages())
+
+                message.add("assistant", response)
+
+            except Exception as e:
+                st.error(f"APIリクエストに失敗しました: {e}")
+                time.sleep(3)
+
+            finally:
+                st.rerun()
+
+    # page footer
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        if st.button(
+            label="",
+            help="Copy Response",
+            icon="📋",
+        ):
+            ChatModal().modal(
+                type="copy_response", messages=message.get_messages()
             )
-            time.sleep(3)
-            st.rerun()
 
-        message.add("user", user_input)
-        uri = api_request_inputs.get_uri()
-        header_dict = request_header.get_header_dict()
-        request_body = api_request_inputs.get_req_body()
-        # URIとリクエストボディのJSON形式検証
-
-        try:
-            user_property_path = st.session_state.user_property_path
-            llm = LlmAPI(
-                # uri=sent_uri,
-                uri=uri,
-                header_dict=header_dict,
-                # req_body=req_body,
-                req_body=request_body,
-                # user_property_path=st.session_state.user_property_path,
-                user_property_path=user_property_path,
-            )
-
-            # replace llm request
-            if st.session_state.use_dynamic_inputs:
-                llm.prepare_dynamic_request(st.session_state)
-
-            # send message:
-            response = llm.single_response(message.get_messages())
-
-            message.add("assistant", response)
-
-        except Exception as e:
-            st.error(f"APIリクエストに失敗しました: {e}")
-            time.sleep(3)
-
-        finally:
-            st.rerun()
+    with col2:
+        pass
+    with col3:
+        pass
+    with col4:
+        pass
 
 
 # render page
