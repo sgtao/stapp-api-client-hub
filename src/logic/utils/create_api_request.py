@@ -135,6 +135,13 @@ async def create_api_request(request: Request):
     req_body = session_state.get("req_body", {}) if method != "GET" else {}
     # print(f"Original req_body: {req_body}")
 
+    # arrange messages in req_body with request.body.messages
+    _messages = req_body.get("messages", [])
+    _body_msgs = body_data.get("messages", [])
+    for msg in _body_msgs:
+        _messages.append(msg)
+    req_body["messages"] = _messages
+
     if session_state.get("use_dynamic_inputs", False):
         api_requestor = ApiRequestor()
         api_url = api_requestor.replace_uri(session_state, api_url)
