@@ -81,7 +81,7 @@ def main():
         config_files.render_config_viewer(selected_config_file, config)
 
     # Load Config and show Request settings
-    col1, col2, col3, col4, col5 = st.columns(5)
+    col1, col2, col3 = st.columns(3)
     with col1:
         if st.button("Load Config File", icon="📤"):
             # 読み込んだコンフィグをセッションステートに適用
@@ -106,10 +106,10 @@ def main():
             # 全てのセッション状態をクリアする場合はこちらを使用
             st.session_state.clear()
             st.rerun()
-    with col4:
-        pass
-    with col5:
-        pass
+    # with col4:
+    #     pass
+    # with col5:
+    #     pass
 
     # Chat with Config
     with st.container(height="stretch"):
@@ -164,8 +164,8 @@ def main():
                 st.rerun()
 
     # page footer
-    col1, col2, col3, col4 = st.columns(4)
-    with col1:
+    cols = st.columns(5)
+    with cols[0]:
         if st.button(
             label="",
             help="Copy Response",
@@ -175,11 +175,13 @@ def main():
                 type="copy_response", messages=message.get_messages()
             )
 
-    with col2:
+    with cols[1]:
         pass
-    with col3:
+    with cols[2]:
         pass
-    with col4:
+    with cols[3]:
+        pass
+    with cols[4]:
         pass
 
 
