@@ -7,24 +7,51 @@ import yaml
 import streamlit as st
 
 ASSETS_DIR = "assets"
-APPEND_DIR = "privates"
+PRIVATES_DIR = "privates"
 
 
 class ConfigFiles:
-    def __init__(self) -> None:
-        self.config_file = []
-        # assetsフォルダからyamlファイルを選択
-        self.config_files = sorted(
-            glob.glob(os.path.join(ASSETS_DIR, "*.yaml")),
-            key=self.natural_keys,
-        )
-        # for private_config in glob.glob(os.path.join(APPEND_DIR, "*.yaml")):
-        private_configs = sorted(
-            glob.glob(os.path.join(APPEND_DIR, "*.yaml")),
-            key=self.natural_keys,
-        )
-        for private_config in private_configs:
-            self.config_files.append(private_config)
+    def __init__(self, config_mode = "default"):
+        self.config_mode = config_mode
+        self.config_files = self._load_config_files()
+
+    def _build_dirs(self):
+        if self.config_mode == "default":
+            return [
+                ASSETS_DIR,
+                PRIVATES_DIR,
+            ]
+        return [
+            os.path.join(ASSETS_DIR, self.config_mode),
+            os.path.join(PRIVATES_DIR, self.config_mode),
+        ]
+
+    def _load_config_files(self):
+        files = []
+        for base_dir in self._build_dirs():
+            if not os.path.isdir(base_dir):
+                continue
+            files.extend(
+                sorted(
+                    glob.glob(os.path.join(base_dir, "*.yaml")),
+                    key=self.natural_keys,
+                )
+            )
+        return files
+
+    # def __init__(self) -> None:
+    #     self.config_file = []
+    #     # assetsフォルダからyamlファイルを選択
+    #     self.config_files = sorted(
+    #         glob.glob(os.path.join(ASSETS_DIR, "*.yaml")),
+    #         key=self.natural_keys,
+    #     )
+    #     private_configs = sorted(
+    #         glob.glob(os.path.join(APPEND_DIR, "*.yaml")),
+    #         key=self.natural_keys,
+    #     )
+    #     for private_config in private_configs:
+    #         self.config_files.append(private_config)
 
     # atoi and natural_keys is for Sort files loaded with glob.glob.
     # reference : https://teshi-learn.com/2021-04/python-glob-glob-sorted/

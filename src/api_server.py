@@ -11,6 +11,20 @@ APP_NAME = "api_server"
 _server_port = 3000  # デフォルト値
 
 
+def parse_args():
+    parser = argparse.ArgumentParser(description="Run the FastAPI server.")
+    parser.add_argument(
+        "--port", type=int, default=3000, help="Port number to listen on"
+    )
+    parser.add_argument(
+        "--config",
+        type=str,
+        default="default",
+        help="config mode (e.g. single, multi)",
+    )
+    return parser.parse_args()
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """
@@ -40,14 +54,16 @@ app.include_router(api_v0_router, prefix="/api/v0")
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Run the FastAPI server.")
-    parser.add_argument(
-        "--port", type=int, default=3000, help="Port number to listen on"
-    )
-    args = parser.parse_args()
+    # parser = argparse.ArgumentParser(description="Run the FastAPI server.")
+    # parser.add_argument(
+    #     "--port", type=int, default=3000, help="Port number to listen on"
+    # )
+    args = parse_args()
 
     # ★ グローバル変数に保存
     _server_port = args.port
+    # ★ アプリケーションの状態に保存（lifespan内でもアクセス可能）
+    app.state.config_mode = args.config
 
     print(f"Starting server on port: {args.port}")
     api_logger = AppLogger(APP_NAME)
