@@ -1,0 +1,11 @@
+title: test_post_msg_via_3000port.yaml
+note: |
+  - post message to gpt-oss-20b via Simple API Client(port 3000)
+session_state:
+  config_file: assets/002_submit_user_message.yaml
+  method: POST
+  num_inputs: 1
+  uri: http://localhost:3000/api/v0/messages
+  use_dynamic_inputs: true
+  user_input_0: openai/gpt-oss-20b
+  user_property_path: results
