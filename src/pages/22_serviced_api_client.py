@@ -59,7 +59,7 @@ def main():
                 label="User Message",
                 placeholder="Please input message , when request message",
             )
-            col1, col2, col3 = st.columns(3)
+            col1, col2, col3, col4 = st.columns(4)
             try:
                 with col1:
                     if st.button("Rerun (`R`)", icon="🔃"):
@@ -84,6 +84,21 @@ def main():
                                 {"role": "user", "content": user_message}
                             )
                         uri = request_inputs.make_uri(path="/api/v0/messages")
+                        api_response = api_client.post_api_server(
+                            uri=uri,
+                            config_file=st.session_state.config_file,
+                            messages=messages,
+                        )
+                with col4:
+                    if st.button(
+                        "Request actions", type="secondary", icon="🏃"
+                    ):
+                        # APIリクエスト送信
+                        if user_message != "":
+                            messages.append(
+                                {"role": "user", "content": user_message}
+                            )
+                        uri = request_inputs.make_uri(path="/api/v0/actions")
                         api_response = api_client.post_api_server(
                             uri=uri,
                             config_file=st.session_state.config_file,
