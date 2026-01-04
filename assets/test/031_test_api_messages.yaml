@@ -1,6 +1,7 @@
 # test_api_messages.yaml
 title: test api messages using 024_groq_prompt_for_chatbot
 note: |
+  - test config for api_service with port 3000
   - Grop API config with `user_input_0` model has system prompt for chatbot app.
   - From [Grop API models for chat](https://console.groq.com/docs/models), select one and input `user_input_0`. i.e.:
     - `gemma2-9b-it`

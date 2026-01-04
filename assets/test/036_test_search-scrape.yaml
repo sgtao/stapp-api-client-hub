@@ -1,6 +1,7 @@
 # test_search_scrape.yaml
 title: test search_scrape api
 note: |
+  - test config for api_service with port 3000
   - `search_scrape` API をテストする
   - `user_input_0`: Query Word
     - 例）`openai`

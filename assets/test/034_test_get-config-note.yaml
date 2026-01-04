@@ -1,6 +1,7 @@
 # 034_test_get-config-note.yaml
 title: for test, get-config-note of user_input_0 confgi flle.
 note: |
+  - test config for api_service with port 3000
   - config-title API で、指定された設定ファイルのNoteを取得します
   - `user_input_0`: config file path
 session_state:

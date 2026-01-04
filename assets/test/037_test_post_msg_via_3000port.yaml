@@ -1,8 +1,9 @@
 title: test_post_msg_via_3000port.yaml
 note: |
+  - test config for api_service with port 3000
   - post message to gpt-oss-20b via Simple API Client(port 3000)
 session_state:
-  config_file: assets/002_submit_user_message.yaml
+  config_file: assets/single/002_submit_user_message.yaml
   method: POST
   num_inputs: 1
   uri: http://localhost:3000/api/v0/messages

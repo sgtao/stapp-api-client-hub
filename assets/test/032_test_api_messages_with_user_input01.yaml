@@ -1,6 +1,7 @@
 # test_api_messages_with_user_input01.yaml
 title: test api messages using 021_groq_llama_word_explain conf
 note: |
+  - test config for api_service with port 3000
   - Grop API（llama4 17b）と用語（user_0）と補足説明（user_1）を使って会話します。
   - Note：**User_Input増加し、`user_input_1`を準備してください。**
   - use model is `meta-llama/llama-4-scout-17b-16e-instruct`
@@ -11,7 +12,7 @@ session_state:
   method: POST
   req_body:
     # model: "llama-3.3-70b-versatile"
-    config_file: assets/021_groq_llama_word_explain.yaml
+    config_file: assets/single/021_groq_llama_word_explain.yaml
     num_user_inputs: 2
     user_inputs: 
       user_input_0: "Wikipedia"

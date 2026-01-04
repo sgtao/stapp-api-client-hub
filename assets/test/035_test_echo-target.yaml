@@ -1,6 +1,7 @@
 # 035_test_echo-target.yaml
 title: test echo-target api
 note: |
+  - test config for api_service with port 3000
   - `echo_target` API （`target`から`response_path`を抽出するAPI）のテストファイル
 session_state:
   header_df:
