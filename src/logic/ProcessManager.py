@@ -10,10 +10,11 @@ SUBPROCESS_PROG = "src/api_server.py"
 
 
 class ProcessInfo:
-    def __init__(self, server_id: str, process, port: int):
+    def __init__(self, server_id: str, process, port: int, config_mode):
         self.server_id = server_id
         self.process = process
         self.port = port
+        self.config_mode = config_mode
         self.start_time = time.time()
 
 
@@ -23,7 +24,9 @@ class ProcessManager:
         self.num_server = 0
 
     # def start_server(self, server_id: str, port: int, use_package=False):
-    def start_server(self, port: int, use_package=False):
+    def start_server(
+        self, port: int, use_package=False, config_mode="default"
+    ):
         """
         FastAPIサーバーをバックグラウンドで起動します。
         """
@@ -42,14 +45,29 @@ class ProcessManager:
         try:
             # APIサーバーを起動し、プロセスをセッション状態に保存
             # command = ["python", "api_server.py", "--port", str(port)]
-            command = ["python", SUBPROCESS_PROG, "--port", str(port)]
+            command = [
+                "python",
+                SUBPROCESS_PROG,
+                "--port",
+                str(port),
+                "--config",
+                config_mode,
+            ]
             if use_package:
                 package_prog = "dist/api_server/api_server"
-                command = [package_prog, "--port", str(port)]
+                command = [
+                    package_prog,
+                    "--port",
+                    str(port),
+                    "--config",
+                    config_mode,
+                ]
 
             process = self.launch_local(command)
 
-            self.servers[server_id] = ProcessInfo(server_id, process, port)
+            self.servers[server_id] = ProcessInfo(
+                server_id, process, port, config_mode
+            )
             # st.session_state.servers = self.servers
             # st.success(f"API Server started on port {port}")
             return True
@@ -82,6 +100,7 @@ class ProcessManager:
             "server_id": server_id,
             "running": info.process.poll() is None,
             "port": info.port,
+            "config_mode": info.config_mode,
             "uptime": time.time() - info.start_time,
         }
 

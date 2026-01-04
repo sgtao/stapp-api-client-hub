@@ -11,6 +11,8 @@ import streamlit as st
 
 from ui.SideMenus import SideMenus
 from ui.ResponseViewer import ResponseViewer
+from ui.utils.config_mode_selector import config_mode_selector
+
 from logic.ApiRequestor import ApiRequestor
 from logic.AppLogger import AppLogger
 from logic.ProcessManager import ProcessManager
@@ -248,6 +250,7 @@ def main():
         value=st.session_state.port_number,
         step=1,
     )
+    config_mode = config_mode_selector()
 
     # APIサーバーの起動・停止ボタン
     cols = st.columns(3)
@@ -264,7 +267,9 @@ def main():
             icon="🚀",
         ):
             # start_api_server(port, _use_package)
-            pm.start_server(port=port, use_package=_use_package)
+            pm.start_server(
+                port=port, use_package=_use_package, config_mode=config_mode
+            )
             st.session_state.servers = pm.get_servers()
             st.rerun()
 
@@ -279,9 +284,12 @@ def main():
     for server_id in pm_list_servers:  # pm.list_servers():
         # st.write(pm.get_status(server_id))
         info = pm.get_status(server_id)
+        _exp_label = (
+            f"{server_id}: port {info['port']}, cfg.={info['config_mode']}"
+        )
         with st.expander(
             # label=f"{server_id}: port {info['port']}", key=f"exp_{server_id}"
-            label=f"{server_id}: port {info['port']}",
+            label=_exp_label,
             expanded=True,
         ):
             cols = st.columns(3)

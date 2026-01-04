@@ -11,13 +11,7 @@ APP_NAME = "api_server"
 router = APIRouter(tags=["Config"])
 
 
-# def get_config_list():
-#     # assets/privatesフォルダからyamlファイルを選択
-#     config_files = ConfigFiles()
-#     return config_files.get_config_files_list()
-# src/api/v0/config_controller.py
 def get_config_list(config_mode="default"):
-    # config_mode = getattr(request.app.state, "config_mode", "default")
     config_files = ConfigFiles(config_mode=config_mode)
     return config_files.get_config_files_list()
 
