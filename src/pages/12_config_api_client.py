@@ -9,6 +9,7 @@ from ui.ResponseViewer import ResponseViewer
 from ui.ClientController import ClientController
 from ui.ConfigFiles import ConfigFiles
 from ui.SideMenus import SideMenus
+from ui.utils.config_mode_selector import config_mode_selector
 from logic.ApiRequestor import ApiRequestor
 from logic.AppLogger import AppLogger
 
@@ -36,7 +37,8 @@ def main():
     client_controller = ClientController()
 
     # assets/privatesフォルダからyamlファイルを選択
-    config_files = ConfigFiles()
+    config_mode = config_mode_selector()
+    config_files = ConfigFiles(config_mode=config_mode)
 
     if not config_files:
         st.warning(

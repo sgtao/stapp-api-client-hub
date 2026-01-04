@@ -11,7 +11,7 @@ PRIVATES_DIR = "privates"
 
 
 class ConfigFiles:
-    def __init__(self, config_mode = "default"):
+    def __init__(self, config_mode="default"):
         self.config_mode = config_mode
         self.config_files = self._load_config_files()
 

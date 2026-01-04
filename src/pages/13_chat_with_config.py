@@ -9,8 +9,8 @@ from ui.ChatMessage import ChatMessage
 from ui.ChatModal import ChatModal
 from ui.ClientController import ClientController
 from ui.ConfigFiles import ConfigFiles
-
 from ui.SideMenus import SideMenus
+from ui.utils.config_mode_selector import config_mode_selector
 
 from logic.AppLogger import AppLogger
 from logic.ConfigProcess import ConfigProcess
@@ -65,7 +65,8 @@ def main():
     config_process = ConfigProcess()
 
     # assets/privatesフォルダからyamlファイルを選択
-    config_files = ConfigFiles()
+    config_mode = config_mode_selector()
+    config_files = ConfigFiles(config_mode=config_mode)
 
     if not config_files:
         st.warning(
