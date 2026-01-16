@@ -119,6 +119,7 @@ def main():
         user_input = st.chat_input(
             placeholder="After load config, Submit any message",
             disabled=not st.session_state.config_loaded,
+            max_chars=8000,
         )
         if user_input:
             # get response from LlmAPI
