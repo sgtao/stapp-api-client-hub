@@ -27,7 +27,7 @@ def main():
     st.title(f"🚀 {APP_TITLE}")
     """
     `assets`と`privates`配下のconfigファイル(YAML)の定義に沿って実行します。
-    - `single_config`: APIリクエスト発行。`action_config`: config_fileのリクエストを実行
+    - `session_state`: APIリクエスト発行。`action_state`: config_fileのリクエストを実行
     """
 
     # 以下は11_simple_api_client.pyと同様のAPIリクエスト部分
