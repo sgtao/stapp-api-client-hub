@@ -2,11 +2,12 @@
 import streamlit as st
 
 
-def config_mode_selector():
+def config_mode_selector(
+    mode_options = ["default", "single", "actions", "test"]
+):
     """
     assets/privatesフォルダのサブフォルダをを選択
     """
-    mode_options = ["default", "single", "actions", "test"]
     return st.radio(
         "Which config file mode(other than default are subfolder)",
         options=mode_options,

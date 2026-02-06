@@ -65,7 +65,9 @@ def main():
     config_process = ConfigProcess()
 
     # assets/privatesフォルダからyamlファイルを選択
-    config_mode = config_mode_selector()
+    config_mode = config_mode_selector(
+        mode_options = ["default", "single", "test"]
+    )
     config_files = ConfigFiles(config_mode=config_mode)
 
     if not config_files:
