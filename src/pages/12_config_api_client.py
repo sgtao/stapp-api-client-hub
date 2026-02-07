@@ -39,7 +39,7 @@ def main():
 
     # assets/privatesフォルダからyamlファイルを選択
     config_mode = config_mode_selector(
-        mode_options = ["default", "single", "test"]
+        mode_options=["default", "single", "test"]
     )
     config_files = ConfigFiles(config_mode=config_mode)
 
