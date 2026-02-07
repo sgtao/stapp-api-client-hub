@@ -45,6 +45,21 @@ class ChatService:
         else:
             return ""
 
+    def read_action_config(self, config_file_path):
+        config_data = read_yaml_file(config_file_path)
+        config_data["api_key"] = self.get_apikey()
+        action_configs = []
+        if "session_state" in config_data:
+            action_configs.append({"type": "single"})
+        if "single_config" in config_data:
+            action_configs.append({"type": "single"})
+        if "action_state" in config_data:
+            action_configs = config_data.get("action_state", [])
+        if "action_config" in config_data:
+            action_configs = config_data.get("action_config", [])
+
+        return action_configs
+
     def prepare_post_data(self, body_data):
         """
         クライアントから渡されたリクエストボディ (`body_data`) を解析し、
@@ -75,16 +90,11 @@ class ChatService:
             raise HTTPException(
                 status_code=400, detail="Missing 'config_file'"
             )
-        config_data = read_yaml_file(config_file_path)
+        # config_data = read_yaml_file(config_file_path)
 
         # print(f"config_data: {config_data}")
 
-        config_data["api_key"] = self.get_apikey()
-        action_configs = []
-        if "session_state" in config_data:
-            action_configs.append({"type": "single"})
-        if "action_state" in config_data:
-            config_data.get("action_state", [])
+        action_configs = self.read_action_config(config_file_path)
 
         session_state = {}
         num_user_inputs = body_data.get("num_user_inputs", 0)
@@ -139,6 +149,9 @@ class ChatService:
         Exception
             各アクションの実行中に発生した例外（ログ出力と警告UIを伴う）。
         """
+        self.app_logger.info_log(f"post message: {messages}")
+        self.app_logger.info_log(f"with config: {action_configs}")
+
         results = []
         result = ""
 

@@ -1,0 +1,142 @@
+# action_config_client.py
+# import json
+import streamlit as st
+
+from ui.ApiClient import ApiClient
+from ui.ConfigFiles import ConfigFiles
+from ui.ResponseViewer import ResponseViewer
+from ui.SideMenus import SideMenus
+from ui.utils.config_mode_selector import config_mode_selector
+
+# from functions.ApiRequestor import ApiRequestor
+from logic.AppLogger import AppLogger
+from logic.ChatService import ChatService
+from logic.utils.read_yaml_file import read_yaml_file
+
+# APP_TITLE = "APIクライアントアプリ"
+APP_TITLE = "Action Config Client"
+
+
+def initial_session_state():
+    # セッション状態の初期化
+    if "config_file" not in st.session_state:
+        st.session_state.config_file = ""
+
+
+def main():
+    st.page_link("main.py", label="Back to Home", icon="🏠")
+
+    st.title(f"🙏 {APP_TITLE}")
+    # インスタンス化
+    chat_service = ChatService()
+    response_viewer = ResponseViewer()
+    # api_requestor = ApiRequestor()
+    api_client = ApiClient()
+    # assets/privatesフォルダからyamlファイルを選択
+    config_mode = config_mode_selector(mode_options=["actions"])
+    config_files = ConfigFiles(config_mode=config_mode)
+
+    if not config_files:
+        st.warning(
+            "No YAML config files in assets and private. Please add some."
+        )
+        return
+
+    try:
+        # Setup to access API-Server
+        config_file_path = config_files.render_config_selector()
+        if config_file_path == "":
+            st.warning("Please check to access API Server!")
+            return
+        else:
+            config_data = read_yaml_file(config_file_path)
+            config_title = config_data.get("title",None)
+            config_note = config_data.get("note",None)
+            if config_title:
+                st.write(f"##### Title: {config_title}")
+            if config_note:
+                st.info(f"Note: {config_title}")
+
+            cols = st.columns(4)
+            with cols[0]:
+                if st.button("Set Config", type="primary"):
+                    st.session_state.config_file = config_file_path
+                    api_client.clr_api_response()
+                    st.rerun()
+            with cols[1]:
+                if st.button("Rerun (`R`)", icon="🔃"):
+                    st.rerun()
+            with cols[2]:
+                pass
+            with cols[3]:
+                pass
+
+        # リクエスト送信ボタン
+        if st.session_state.config_file == config_file_path:
+            st.write(f"used config file: {st.session_state.config_file}")
+            with st.expander("config file date"):
+                st.write(config_data)
+
+            api_response = api_client.get_api_response()
+            messages = []
+            user_message = st.text_input(
+                label="User Message",
+                placeholder="Please input message , when request message",
+            )
+            col1, col2, col3 = st.columns(3)
+            try:
+                with col1:
+                    if st.button("Start actions", type="secondary", icon="🏃"):
+                        # APIリクエスト作成・送信
+                        action_configs = chat_service.read_action_config(
+                            config_file_path
+                        )
+                        if user_message != "":
+                            messages.append(
+                                {"role": "user", "content": user_message}
+                            )
+                        user_input_state = {}
+                        num_user_inputs = st.session_state.get(
+                            "num_user_inputs", 0
+                        )
+                        user_input_state["num_inputs"] = num_user_inputs
+                        for i in range(num_user_inputs):
+                            user_input_state[f"user_input_{i}"] = (
+                                st.session_state.get(f"user_input_{i}", "")
+                            )
+
+                        api_response = chat_service.post_messages_with_configs(
+                            messages=messages,
+                            session_state=user_input_state,
+                            action_configs=action_configs,
+                        )
+                with col2:
+                    pass
+                with col3:
+                    pass
+
+            except Exception as e:
+                # ユーザー向けメッセージ
+                st.error(
+                    "リクエスト中にエラー発生。詳細は以下をご確認ください。"
+                )
+                # 詳細な例外情報を表示
+                st.exception(e)
+
+            # レスポンス表示
+            if api_response:
+                st.subheader("API レスポンス")
+                response_viewer.render_viewer(api_response)
+
+    except Exception as e:
+        st.error(f"Error occured! {e}")
+
+
+if __name__ == "__main__":
+    initial_session_state()
+    app_logger = AppLogger(APP_TITLE)
+    app_logger.app_start()
+    side_menus = SideMenus()
+    side_menus.set_user_property_path("results")
+    side_menus.render_api_client_menu()
+    main()

@@ -3,7 +3,7 @@ import streamlit as st
 
 
 def config_mode_selector(
-    mode_options = ["default", "single", "actions", "test"]
+    mode_options=["default", "single", "actions", "test"]
 ):
     """
     assets/privatesフォルダのサブフォルダをを選択
