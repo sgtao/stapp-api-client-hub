@@ -50,8 +50,8 @@ def main():
             return
         else:
             config_data = read_yaml_file(config_file_path)
-            config_title = config_data.get("title",None)
-            config_note = config_data.get("note",None)
+            config_title = config_data.get("title", None)
+            config_note = config_data.get("note", None)
             if config_title:
                 st.write(f"##### Title: {config_title}")
             if config_note:
