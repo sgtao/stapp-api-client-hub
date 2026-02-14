@@ -223,8 +223,8 @@ class ChatService:
             else:
                 result = "Nothing!"
 
-            results.append(result)
             self.app_logger.info_log(f"Action result_{index}: {result}")
+            results.append(result)
 
         # return results[-1] if results else None
         return results

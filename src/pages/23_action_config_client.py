@@ -79,7 +79,7 @@ def main():
 
             api_response = api_client.get_api_response()
             messages = []
-            user_message = st.text_input(
+            user_message = st.text_area(
                 label="User Message",
                 placeholder="Please input message , when request message",
             )
@@ -110,6 +110,8 @@ def main():
                             session_state=user_input_state,
                             action_configs=action_configs,
                         )
+                        # セッションに保存
+                        st.session_state.api_response = api_response
                 with col2:
                     pass
                 with col3:
@@ -124,9 +126,16 @@ def main():
                 st.exception(e)
 
             # レスポンス表示
-            if api_response:
+            # 修正ポイント: リストが渡された場合は、最後のアクション結果を対象にする
+            target_res = (
+                api_response[-1]
+                if isinstance(api_response, list)
+                else api_response
+            )
+            if target_res:
                 st.subheader("API レスポンス")
-                response_viewer.render_viewer(api_response)
+                # response_viewer.render_viewer(target_res)
+                st.write(target_res.get("results",""))
 
     except Exception as e:
         st.error(f"Error occured! {e}")
