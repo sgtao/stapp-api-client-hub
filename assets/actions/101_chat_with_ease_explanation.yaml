@@ -1,0 +1,20 @@
+title: 101_chat_with_ease_explanation.yaml
+note: |
+  - gpt-oss-20bとのチャットで返答を常にファインマンテクニックで解説する
+action_config:
+- type: request
+  config_file: assets/single/002_submit_user_message.yaml
+  method: POST
+  num_inputs: 1
+  uri: http://localhost:3000/api/v0/messages
+  use_dynamic_inputs: true
+  user_input_0: openai/gpt-oss-20b
+  user_property_path: results
+- type: request
+  config_file: assets/single/101_explain_with_fineman_technique.yaml
+  method: POST
+  num_inputs: 1
+  uri: http://localhost:3000/api/v0/single
+  use_dynamic_inputs: true
+  user_input_0: ＜action_result_0＞
+  user_property_path: results

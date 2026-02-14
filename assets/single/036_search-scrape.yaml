@@ -1,0 +1,17 @@
+# search_scrape.yaml
+title: search_scrape api
+note: |
+  - config for api_service with port 3000
+  - `search_scrape` API でDDGO検索する
+  - `user_input_0`: Query Word
+    - 例）`openai`
+session_state:
+  header_df:
+  - Property: Content-Type
+    Value: application/json
+  method: POST
+  req_body:
+    query: ＜user_input_0＞
+  uri: http://localhost:3000/api/v0/search_scrape
+  use_dynamic_inputs: true
+  user_property_path: 'results'
