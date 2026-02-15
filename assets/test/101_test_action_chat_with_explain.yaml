@@ -1,0 +1,23 @@
+# test_action_chat_with_explain.yaml
+title: test action config
+note: |
+  - test action config of chat_with_explanation via port 3001
+  - `action` API （`target`から`response_path`を抽出するAPI）のテストファイル
+session_state:
+  header_df:
+  - Property: Content-Type
+    Value: application/json
+  method: POST
+  req_body:
+    config_file: "assets/actions/101_chat_with_ease_explanation.yaml"
+    num_user_inputs: 0
+    messages: 
+    - role: "user"
+      content: "hello"
+    - role: "assistant"
+      content: "こんにちは！何かお手伝いできることがありますか？"
+    - role: "user"
+      content: "どんな手伝いができますか？"
+  uri: http://localhost:3001/api/v0/actions
+  use_dynamic_inputs: true
+  user_property_path: 'results'

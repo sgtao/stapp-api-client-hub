@@ -2,7 +2,7 @@
 title: Groq explain word with fineman technique
 note: |
   - Grop API（llama4 17b）へ`user_input_0`の内容を解説します。
-session_state:
+single_config:
   header_df:
   - Property: Content-Type
     Value: application/json
@@ -11,7 +11,8 @@ session_state:
   method: POST
   req_body:
     # model: "llama-3.3-70b-versatile"
-    model: "meta-llama/llama-4-scout-17b-16e-instruct"
+    # model: "meta-llama/llama-4-scout-17b-16e-instruct"
+    model: "openai/gpt-oss-20b"
     messages:
       - role: "system"
         content: "ユーザーのメッセージをファインマンテクニックで解説して下さい。
