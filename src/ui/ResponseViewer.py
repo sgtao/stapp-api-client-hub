@@ -132,3 +132,40 @@ class ResponseViewer:
             st.error("プロパティの型が想定と異なります。")
         except Exception as e:
             st.error(f"Error occurs: {e}")
+
+    def render_results_viewer(self, results):
+        # レスポンス表示
+        if len(results) == 0:
+            return
+
+        # 修正ポイント: リストが渡された場合は、最後のアクション結果を対象にする
+        target_res = results[-1] if isinstance(results, list) else results
+        # --- レスポンス表示セクション ---
+        if target_res:
+            st.subheader("Result:")
+
+            # データの抽出（resultsキーがあれば取得、なければ全体）
+            # YAMLの設定により results キーの中に実際の回答が入る構造に対応
+            display_data = (
+                target_res.get("results")
+                if isinstance(target_res, dict)
+                else target_res
+            )
+
+            if display_data:
+                # st.tabsによる表示モードの切り替え
+                tab1, tab2, tab3 = st.tabs(
+                    ["📝 View", "📋 Copy Mode", "📁 Whole Results"]
+                )
+                with tab1:
+                    # 人間が読みやすい形式。Markdownとして解釈させる
+                    st.markdown(display_data)
+                with tab2:
+                    # コピー可能なコードブロック形式。言語指定なしで汎用的に。
+                    st.code(display_data, language=None)
+                with tab3:
+                    # resultsすべてを表示
+                    st.json(results, expanded=True)
+            else:
+                st.warning("No valid data found in the response results.")
+

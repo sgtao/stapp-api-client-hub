@@ -5,7 +5,7 @@ import streamlit as st
 from ui.ApiClient import ApiClient
 from ui.ConfigFiles import ConfigFiles
 
-# from ui.ResponseViewer import ResponseViewer
+from ui.ResponseViewer import ResponseViewer
 from ui.SideMenus import SideMenus
 from ui.utils.config_mode_selector import config_mode_selector
 
@@ -30,7 +30,7 @@ def main():
     st.title(f"🙏 {APP_TITLE}")
     # インスタンス化
     chat_service = ChatService()
-    # response_viewer = ResponseViewer()
+    response_viewer = ResponseViewer()
     # api_requestor = ApiRequestor()
     api_client = ApiClient()
     # assets/privatesフォルダからyamlファイルを選択
@@ -128,39 +128,7 @@ def main():
                 st.exception(e)
 
             # レスポンス表示
-            # st.write(results)
-            # 修正ポイント: リストが渡された場合は、最後のアクション結果を対象にする
-            target_res = (
-                results[-1]
-                if isinstance(results, list)
-                else results
-            )
-            # --- レスポンス表示セクション ---
-            if target_res:
-                st.subheader("Final Result")
-                
-                # データの抽出（resultsキーがあれば取得、なければ全体）
-                # YAMLの設定により results キーの中に実際の回答が入る構造に対応
-                display_data = target_res.get("results") if isinstance(target_res, dict) else target_res
-                
-                if display_data:
-                    # st.tabsによる表示モードの切り替え
-                    tab1, tab2, tab3 = st.tabs([
-                        "📝 View",
-                        "📋 Copy Mode",
-                        "📁 Results"
-                    ])
-                    with tab1:
-                        # 人間が読みやすい形式。Markdownとして解釈させる
-                        st.markdown(display_data)
-                    with tab2:
-                        # コピー可能なコードブロック形式。言語指定なしで汎用的に。
-                        st.code(display_data, language=None)
-                    with tab3:
-                        # resultsすべてを表示
-                        st.json(results, expanded=True)
-                else:
-                    st.warning("No valid data found in the response results.")
+            response_viewer.render_results_viewer(results)
 
     except Exception as e:
         st.error(f"Error occured! {e}")
