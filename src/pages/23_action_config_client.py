@@ -22,12 +22,14 @@ def initial_session_state():
     # セッション状態の初期化
     if "config_file" not in st.session_state:
         st.session_state.config_file = ""
+    if "user_input_text_area" not in st.session_state:
+        st.session_state.user_input_text_area = ""
 
 
 def main():
     st.page_link("main.py", label="Back to Home", icon="🏠")
 
-    st.title(f"🙏 {APP_TITLE}")
+    st.title(f"🏃 {APP_TITLE}")
     # インスタンス化
     chat_service = ChatService()
     response_viewer = ResponseViewer()
@@ -36,6 +38,7 @@ def main():
     # assets/privatesフォルダからyamlファイルを選択
     config_mode = config_mode_selector(mode_options=["actions"])
     config_files = ConfigFiles(config_mode=config_mode)
+    view_mode = None
 
     if not config_files:
         st.warning(
@@ -53,6 +56,7 @@ def main():
             config_data = read_yaml_file(config_file_path)
             config_title = config_data.get("title", None)
             config_note = config_data.get("note", None)
+            view_mode = config_data.get("view_mode", None)
             if config_title:
                 st.write(f"##### Title: {config_title}")
             if config_note:
@@ -65,8 +69,7 @@ def main():
                     api_client.clr_api_response()
                     st.rerun()
             with cols[1]:
-                if st.button("Rerun (`R`)", icon="🔃"):
-                    st.rerun()
+                pass
             with cols[2]:
                 pass
             with cols[3]:
@@ -84,11 +87,16 @@ def main():
             user_message = st.text_area(
                 label="User Message",
                 placeholder="Please input message , when request message",
+                value=st.session_state.user_input_text_area,
             )
-            col1, col2, col3 = st.columns(3)
+            cols = st.columns(4)
             try:
-                with col1:
+                with cols[0]:
+                    if st.button("Rerun (`R`)", icon="🔃"):
+                        st.rerun()
+                with cols[1]:
                     if st.button("Start actions", type="secondary", icon="🏃"):
+                        st.session_state.user_input_text_area = user_message
                         # APIリクエスト作成・送信
                         action_configs = chat_service.read_action_config(
                             config_file_path
@@ -114,10 +122,12 @@ def main():
                         )
                         # セッションに保存
                         st.session_state.api_response = api_response
-                with col2:
+                with cols[2]:
                     pass
-                with col3:
-                    pass
+                with cols[3]:
+                    if st.button("Clear", icon="🆑"):
+                        st.session_state.user_input_text_area = ""
+                        st.rerun()
 
             except Exception as e:
                 # ユーザー向けメッセージ
@@ -128,7 +138,7 @@ def main():
                 st.exception(e)
 
             # レスポンス表示
-            response_viewer.render_results_viewer(results)
+            response_viewer.render_results_viewer(results, view_mode)
 
     except Exception as e:
         st.error(f"Error occured! {e}")

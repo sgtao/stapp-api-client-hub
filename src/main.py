@@ -35,6 +35,11 @@ st.page_link(
     label="Go to Serviced API Client page",
     icon="🙏",
 )
+st.page_link(
+    "pages/23_action_config_client.py",
+    label="Go to Serviced Action Config Client page",
+    icon="🏃",
+)
 
 # ログ表示ページへのリンク
 st.page_link("pages/91_logs_viewer.py", label="View Logs", icon="📄")

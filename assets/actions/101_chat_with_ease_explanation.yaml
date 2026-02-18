@@ -18,3 +18,4 @@ action_config:
   use_dynamic_inputs: true
   user_input_0: ＜action_result_0＞
   user_property_path: results
+view_mode: "📋 Copy Tail"

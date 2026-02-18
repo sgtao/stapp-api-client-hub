@@ -133,7 +133,7 @@ class ResponseViewer:
         except Exception as e:
             st.error(f"Error occurs: {e}")
 
-    def render_results_viewer(self, results):
+    def render_results_viewer(self, results, view_mode=None):
         # レスポンス表示
         if len(results) == 0:
             return
@@ -155,7 +155,8 @@ class ResponseViewer:
             if display_data:
                 # st.tabsによる表示モードの切り替え
                 tab1, tab2, tab3 = st.tabs(
-                    ["📝 View", "📋 Copy Mode", "📁 Whole Results"]
+                    ["📝 View", "📋 Copy Tail", "📁 Whole Results"],
+                    default=view_mode,
                 )
                 with tab1:
                     # 人間が読みやすい形式。Markdownとして解釈させる
@@ -168,4 +169,3 @@ class ResponseViewer:
                     st.json(results, expanded=True)
             else:
                 st.warning("No valid data found in the response results.")
-
