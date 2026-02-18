@@ -292,7 +292,7 @@ def main():
             label=_exp_label,
             expanded=True,
         ):
-            cols = st.columns(3)
+            cols = st.columns(4)
             with cols[0]:
                 if st.button(
                     label="Test Hello", key=f"hello_{server_id}", icon="🖐"
@@ -300,14 +300,20 @@ def main():
                     response = test_api_hello(info["port"])
             with cols[1]:
                 if st.button(
-                    "Get Config list",
+                    "Config list",
                     key=f"config_list_{server_id}",
-                    icon="📑",
+                    icon="🗒️",
                 ):
                     response = test_get_config_files(info["port"])
             with cols[2]:
+                st.link_button(
+                    label="Swag. docs",
+                    url=f'http://localhost:{info["port"]}/docs',
+                    icon="🫣"
+                )
+            with cols[3]:
                 if st.button(
-                    label="Stop Process",
+                    label="Stop Proc.",
                     key=f"stop_{server_id}",
                     icon="🛑",
                 ):
