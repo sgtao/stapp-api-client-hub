@@ -2,6 +2,7 @@
 import json
 
 import streamlit as st
+from toon import encode
 
 from logic.ResponseOperator import ResponseOperator
 
@@ -15,6 +16,9 @@ class ResponseViewer:
                 st.session_state.user_property_path = response_path
             else:
                 st.session_state.user_property_path = ""
+
+    def to_toon_text(self, data):
+        return encode(data)
 
     def response_content(self, response):
         content_type = response.headers.get("Content-Type", "")
@@ -72,18 +76,22 @@ class ResponseViewer:
         """抽出された値をタブで表示する"""
         tabs = st.tabs(
             [
+                "auto",
                 "markdown",
-                "text",
                 "json",
                 "code",
                 "html",
+                "toon",
             ]
         )
         with tabs[0]:
-            st.markdown(str(extracted_value))
-        with tabs[1]:
+            # auto with st.write
             st.write(extracted_value)
+        with tabs[1]:
+            # markdown
+            st.markdown(str(extracted_value))
         with tabs[2]:
+            # json
             try:
                 st.json(extracted_value)
             except Exception as e:
@@ -94,9 +102,14 @@ class ResponseViewer:
                     """
                 )
         with tabs[3]:
+            # code
             st.code(extracted_value)
         with tabs[4]:
+            # html
             st.html(extracted_value)
+        with tabs[5]:
+            # toon
+            st.code(self.to_toon_text(extracted_value))
 
     def render_viewer(self, response):
         try:

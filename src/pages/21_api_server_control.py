@@ -309,7 +309,7 @@ def main():
                 st.link_button(
                     label="Swag. docs",
                     url=f'http://localhost:{info["port"]}/docs',
-                    icon="🫣"
+                    icon="🫣",
                 )
             with cols[3]:
                 if st.button(
