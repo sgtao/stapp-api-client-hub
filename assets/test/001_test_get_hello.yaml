@@ -1,0 +1,21 @@
+# test_get_hello.yaml
+title: test get hello
+note: |
+  - test hello api with GET method
+session_state:
+  header_df:
+  - Property: Content-Type
+    Value: application/json
+  method: GET
+  # req_body:
+  #   config_file: assets/024_groq_prompt_for_chatbot.yaml
+  #   num_user_inputs: 1
+  #   user_inputs: 
+  #     user_input_0: "openai/gpt-oss-120b"
+  #   messages: 
+  #     - role: "system"
+  #       content: "あなたは聡明なAIです。
+  #         ユーザの入力に全て日本語で返答を生成してください"
+  uri: "http://localhost:3000/api/v0/hello"
+  use_dynamic_inputs: False
+  user_property_path: results

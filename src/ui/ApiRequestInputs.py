@@ -1,4 +1,8 @@
 # ApiRequestInputs.py
+import json
+import yaml
+# import re
+
 import streamlit as st
 
 METHODS = ["GET", "POST", "PUT", "DELETE"]
@@ -41,6 +45,7 @@ class ApiRequestInputs:
 
     def _update_req_body(self):
         st.session_state.req_body = st.session_state._body_input
+        # st.rerun()
 
     def _update_use_dynamic_inputs(self):
         st.session_state.use_dynamic_inputs = (
@@ -88,6 +93,32 @@ class ApiRequestInputs:
             on_change=self._update_uri,
         )
 
+    def _parse_to_dict(self, data_str):
+        # 1. JSON のチェック
+        try:
+            data = json.loads(data_str)
+            return data, "JSON"
+        except (json.JSONDecodeError, TypeError, ValueError):
+            pass
+
+        # 2. YAML のチェック
+        try:
+            data = yaml.safe_load(data_str)
+            # 構造体（辞書/リスト）であり、かつTOONとして判定されなかった場合
+            if isinstance(data, (dict, list)):
+                return data, "YAML"
+        except yaml.YAMLError:
+            pass
+
+        # 3. 他の形式の場合
+        return None, "Unknown"
+
+    def render_req_body(self, req_body):
+        body_dict, body_type = self._parse_to_dict(req_body)
+        st.write(f"Body format: {body_type}")
+        st.json(body_dict)
+        return json.dumps(body_dict, ensure_ascii=False, indent=4)
+
     def render_body_input(self):
         ext_url_json = "https://tools.m-bsys.com/dev_tools/json-beautifier.php"
         ext_url_yaml = "https://www.site24x7.com/ja/tools/json-to-yaml.html"
@@ -97,14 +128,16 @@ class ApiRequestInputs:
         )
         # リクエストボディ入力（POST, PUTの場合のみ表示）
         if st.session_state.method in ["POST", "PUT"]:
-            with st.expander("リクエストボディ設定"):
-                return st.text_area(
+            with st.expander("リクエストボディ設定（JSON/YAML形式で入力して下さい)"):
+                _req_body = st.text_area(
                     label=label_str,
                     key="_body_input",
                     value=st.session_state.req_body,
                     on_change=self._update_req_body,
                     height=200,
                 )
+                body_dict = self.render_req_body(_req_body)
+                return body_dict
         else:
             return None
 

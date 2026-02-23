@@ -14,6 +14,9 @@ class ConfigFiles:
     def __init__(self, config_mode="default"):
         self.config_mode = config_mode
         self.config_files = self._load_config_files()
+        # session state
+        if "config_loaded" not in st.session_state:
+            st.session_state.config_loaded = False
 
     def _build_dirs(self):
         if self.config_mode == "default":
@@ -71,8 +74,36 @@ class ConfigFiles:
         with open(config_path, "r", encoding="utf-8") as f:
             return yaml.safe_load(f)
 
+    # copied from def config_mode_selector
+    def _on_change_config_mode(self):
+        st.session_state.config_loaded = False
+
+    def render_config_mode(self,
+        mode_options=["default", "single", "actions", "test"]
+    ):
+        """
+        assets/privatesフォルダのサブフォルダをを選択
+        """
+        config_mode = st.radio(
+            "Which config file mode(other than default are subfolder)",
+            options=mode_options,
+            index=0,
+            horizontal=True,
+            on_change=self._on_change_config_mode,
+        )
+        self.config_mode = config_mode
+        self.config_files = self._load_config_files()
+        return self.config_mode
+
+    def _on_change_config_selector(self):
+        st.session_state.config_loaded = False
+
     def render_config_selector(self):
-        return st.selectbox("Select a config file", self.config_files)
+        return st.selectbox(
+            label="Select a config file",
+            options=self.config_files,
+            on_change=self._on_change_config_selector,
+        )
 
     def render_config_viewer(self, config_path, config):
         if "title" in config:
