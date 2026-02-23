@@ -78,8 +78,8 @@ class ConfigFiles:
     def _on_change_config_mode(self):
         st.session_state.config_loaded = False
 
-    def render_config_mode(self,
-        mode_options=["default", "single", "actions", "test"]
+    def render_config_mode(
+        self, mode_options=["default", "single", "actions", "test"]
     ):
         """
         assets/privatesフォルダのサブフォルダをを選択

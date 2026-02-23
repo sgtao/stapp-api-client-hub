@@ -1,6 +1,7 @@
 # ApiRequestInputs.py
 import json
 import yaml
+
 # import re
 
 import streamlit as st
@@ -128,7 +129,9 @@ class ApiRequestInputs:
         )
         # リクエストボディ入力（POST, PUTの場合のみ表示）
         if st.session_state.method in ["POST", "PUT"]:
-            with st.expander("リクエストボディ設定（JSON/YAML形式で入力して下さい)"):
+            with st.expander(
+                "リクエストボディ設定（JSON/YAML形式で入力して下さい)"
+            ):
                 _req_body = st.text_area(
                     label=label_str,
                     key="_body_input",

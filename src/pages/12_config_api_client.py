@@ -9,7 +9,8 @@ from ui.ResponseViewer import ResponseViewer
 from ui.ClientController import ClientController
 from ui.ConfigFiles import ConfigFiles
 from ui.SideMenus import SideMenus
-from ui.utils.config_mode_selector import config_mode_selector
+
+# from ui.utils.config_mode_selector import config_mode_selector
 from logic.ApiRequestor import ApiRequestor
 from logic.AppLogger import AppLogger
 
@@ -20,6 +21,7 @@ def initialize_session_state():
     # if "config_loaded" not in st.session_state:
     #     st.session_state.config_loaded = False
     pass
+
 
 def main():
     st.page_link("main.py", label="Back to Home", icon="🏠")
@@ -43,9 +45,7 @@ def main():
     # )
     # config_files = ConfigFiles(config_mode=config_mode)
     config_files = ConfigFiles()
-    config_mode = config_files.render_config_mode(
-        mode_options=["default", "single", "test"]
-    )
+    config_files.render_config_mode(mode_options=["default", "single", "test"])
 
     if not config_files:
         st.warning(
@@ -61,16 +61,13 @@ def main():
         config = config_files.load_config_from_yaml(selected_config_file)
         config_files.render_config_viewer(selected_config_file, config)
 
-    if st.button(
-        label="Load Config File",
-        icon="📤"
-    ):
+    if st.button(label="Load Config File", icon="📤"):
         # 読み込んだコンフィグをセッションステートに適用
         client_controller.set_session_state(config)
         st.session_state.config_loaded = True
         st.rerun()
 
-    if  st.session_state.config_loaded:
+    if st.session_state.config_loaded:
         # ユーザー入力：APIリクエストの指定項目
         method = request_inputs.render_method_selector()
         request_inputs.render_use_dynamic_checkbox()
@@ -85,7 +82,6 @@ def main():
 
         # リクエストボディ入力（POST, PUTの場合のみ表示）
         request_body = request_inputs.render_body_input()
-
 
     if st.button(
         "リクエストを送信",
