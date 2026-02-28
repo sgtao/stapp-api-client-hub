@@ -175,7 +175,7 @@ class ChatService:
                         config=action_config,
                         messages=copied_messages,
                     )
-                    self.app_logger.info_log(f"response: {response.json()}")
+                    # self.app_logger.info_log(f"response: {response.json()}")
                     user_property_path = action_config.get(
                         "user_property_path", "."
                     )
@@ -183,20 +183,20 @@ class ChatService:
                         response.json(),
                         property_path=user_property_path,
                     )
-                    self.app_logger.info_log(f"result: {result}")
+                    # self.app_logger.info_log(f"result: {result}")
 
                     self.api_client_comp.show_success_ui(
                         f"Success Request of {config_file} is {result}.",
                         uri=uri,
                         response=response,
                     )
-
                 except Exception as e:
                     # result = response.json()
                     result = f"Exception occured at {config_file}: {e}"
                     self.api_client_comp.show_warning_ui(
                         f"Exception occured at {config_file}",
                     )
+
             elif _type == "extract":
                 action_config = self.config_mgr.replace_extract_config(
                     session_state=session_state,
@@ -223,10 +223,11 @@ class ChatService:
                     self.api_client_comp.show_success_ui(
                         f"Success to extract is {result}.",
                     )
-                except Exception:
-                    result = target_obj
+                except Exception as e:
+                    # result = target_obj
+                    result = f"Exception occured at {target_obj}: {e}"
                     self.api_client_comp.show_warning_ui(
-                        f"Exception occured at extract, so set {result}",
+                        f"Exception occured at extract, so set {target_obj}",
                     )
 
             else:
