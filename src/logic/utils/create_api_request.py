@@ -6,9 +6,11 @@ from fastapi import Request, HTTPException
 import pandas as pd
 
 from logic.ApiRequestor import ApiRequestor
-
+from logic.AppLogger import AppLogger
 from logic.utils.read_yaml_file import read_yaml_file
 from logic.utils.convert_config_to_header import convert_config_to_header
+
+APP_NAME = "create_api_request"
 
 
 def get_apikey():
@@ -49,10 +51,14 @@ def replace_body(session_state, body_str):
 
 def make_session_state(config):
     session_state = {}
-    if "session_state" not in config:
+    cfg_session_state = {}
+    if "session_state" in config:
+        cfg_session_state = config.get("session_state", {})
+    elif "single_config" in config:
+        cfg_session_state = config.get("single_config", {})
+    else:
         return session_state
 
-    cfg_session_state = config.get("session_state", {})
     if "method" in cfg_session_state:
         session_state["method"] = cfg_session_state.get("method")
     if "uri" in cfg_session_state:
@@ -105,6 +111,9 @@ async def create_api_request(request: Request):
     :param request: FastAPIのRequestオブジェクト
     :return: APIリクエストの情報 (辞書形式)
     """
+    api_logger = AppLogger(f"{APP_NAME}({request.url.path}):")
+    api_logger.info_log(f"Create API Request of {request.method}")
+
     # --- 1. リクエストと設定読み込み ---
     api_request = {}
     try:

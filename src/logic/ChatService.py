@@ -1,4 +1,5 @@
 # ChatService.py
+import copy
 import json
 import os
 
@@ -152,6 +153,8 @@ class ChatService:
         self.app_logger.info_log(f"post message: {messages}")
         self.app_logger.info_log(f"with config: {action_configs}")
 
+        l_copied = messages.copy()
+        copied_messages = copy.deepcopy(l_copied)
         results = []
         result = ""
 
@@ -170,12 +173,17 @@ class ChatService:
 
                     response = self.client.post_msgs_with_config(
                         config=action_config,
-                        messages=messages,
+                        messages=copied_messages,
                     )
-                    result = self.response_op.extract_response_value(
-                        response,
-                        path=action_config.get("user_property_path", "."),
+                    self.app_logger.info_log(f"response: {response.json()}")
+                    user_property_path = action_config.get(
+                        "user_property_path", "."
                     )
+                    result = self.response_op.extract_property_from_json(
+                        response.json(),
+                        property_path=user_property_path,
+                    )
+                    self.app_logger.info_log(f"result: {result}")
 
                     self.api_client_comp.show_success_ui(
                         f"Success Request of {config_file} is {result}.",
@@ -183,8 +191,9 @@ class ChatService:
                         response=response,
                     )
 
-                except Exception:
-                    result = response.json()
+                except Exception as e:
+                    # result = response.json()
+                    result = f"Exception occured at {config_file}: {e}"
                     self.api_client_comp.show_warning_ui(
                         f"Exception occured at {config_file}",
                     )
@@ -195,7 +204,7 @@ class ChatService:
                     results=results,
                 )
                 if action_config.get("target", "") == "messages":
-                    target_obj = self.convert_messages_obj(messages)
+                    target_obj = self.convert_messages_obj(copied_messages)
                 else:
                     _target_text = action_config.get("target", "")
                     # print(f"_target_text: {_target_text}")
