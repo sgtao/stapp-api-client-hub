@@ -230,6 +230,27 @@ class ChatService:
                         f"Exception occured at extract, so set {target_obj}",
                     )
 
+            elif _type == "append_message":
+                try:
+                    action_config = self.config_mgr.replace_append_config(
+                        session_state=session_state,
+                        action_config=cfg,
+                        results=results,
+                    )
+                    append_item = {
+                        "role": action_config.get("role", "assistant"),
+                        "content": action_config.get("content", ""),
+                    }
+                    copied_messages.append(append_item)
+
+                    result = copied_messages
+                except Exception as e:
+                    # result = target_obj
+                    result = f"Exception occured at {target_obj}: {e}"
+                    self.api_client_comp.show_warning_ui(
+                        f"Exception occured at extract, so set {target_obj}",
+                    )
+
             else:
                 result = "Nothing!"
 

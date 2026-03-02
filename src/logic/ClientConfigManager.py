@@ -110,3 +110,23 @@ class ClientConfigManager:
             )
 
         return _replaced_config
+
+    def replace_append_config(self, session_state, action_config, results=[]):
+        _replaced_config = action_config
+
+        # for action of `extract` type
+        if "role" in action_config:
+            _replaced_config["role"] = self.replace_placeholder(
+                session_state=session_state,
+                target_str=action_config.get("role", ""),
+                results=results,
+            )
+
+        if "content" in action_config:
+            _replaced_config["content"] = self.replace_placeholder(
+                session_state=session_state,
+                target_str=action_config.get("content", ""),
+                results=results,
+            )
+
+        return _replaced_config
