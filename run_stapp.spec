@@ -15,11 +15,13 @@ a = Analysis(
     ["run_stapp.py"], # エントリーポイントとなるPythonスクリプト
     pathex=[],    # Pythonのインポートパスに追加するパス
     binaries=[],  # 必要なバイナリファイル（DLLなど）
-    datas=[ # データファイルとその配置先を指定
+    datas=[
         ("src/pages", "pages"),
         ("src/ui", "ui"),
         ("src/logic", "logic"),
-        ("src/main.py", "."),  # メインスクリプト
+        ("src/main.py", "."),
+        ("assets", "assets"),       # 追加: YAML設定ファイル用
+        (".streamlit", ".streamlit"), # 追加: Streamlitの設定用
     ]
     + streamlit_data,  # Streamlitのデータファイルを追加
     hiddenimports=[ # 明示的にインポートが必要なモジュールを指定
@@ -48,6 +50,8 @@ a = Analysis(
         "click",
         "rich",
         "protobuf",
+        "toon",
+        "python-toon",
     ]
     + streamlit_hidden_imports, # Streamlitの全サブモジュールを追加
     hookspath=["./hooks"],  # カスタムフックスクリプトのパス
