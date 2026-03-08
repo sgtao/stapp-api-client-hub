@@ -1,0 +1,83 @@
+import streamlit as st
+
+from ui.SideMenus import SideMenus
+
+# from functions.ApiRequestor import ApiRequestor
+from logic.AppLogger import AppLogger
+from logic.ChatService import ChatService
+
+# from ui.ChatMessage import ChatMessage
+
+# APP_TITLE = "Action Config チャットアプリ"
+APP_TITLE = "Chatbot with Action Config"
+
+
+def main():
+    st.page_link("main.py", label="Back to Home", icon="🏠")
+
+    st.title(f"💬+🏃 {APP_TITLE}")
+    st.info(
+        """チャットしながら履歴要約を表示します
+            - `102_chat_with_response_summary.yaml`を利用
+            - 事前に3000 port で `single` config のAPI-Serverを起動して下さい
+            """
+    )
+    # 1. セッション状態の初期化 [14-16]
+    if "messages" not in st.session_state:
+        st.session_state.messages = []
+
+    # chat_manager = ChatMessage()
+    chat_service = ChatService()
+    # Setup to access API-Server
+    config_file_path = "assets/actions/102_chat_with_response_summary.yaml"
+    action_configs = chat_service.read_action_config(config_file_path)
+
+    # 2. チャット履歴の表示
+    for msg in st.session_state.messages:
+        with st.chat_message(msg["role"]):
+            st.markdown(msg["content"])
+
+    # 3. ユーザー入力の受付
+    if prompt := st.chat_input("何か入力してください"):
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        with st.chat_message("user"):
+            st.markdown(prompt)
+
+        # 4. アクションAPIの実行 (YAMLの指示に従って連鎖実行) [2, 19]
+        with st.spinner("思考中..."):
+            user_input_state = {}
+            num_user_inputs = st.session_state.get("num_user_inputs", 0)
+            user_input_state["num_inputs"] = num_user_inputs
+            for i in range(num_user_inputs):
+                user_input_state[f"user_input_{i}"] = st.session_state.get(
+                    f"user_input_{i}", ""
+                )
+
+            # user_inputs にユーザーの入力を渡す
+            results = chat_service.post_messages_with_configs(
+                messages=st.session_state.messages,
+                session_state=user_input_state,
+                action_configs=action_configs,
+            )
+
+            # 最終ステップの結果を回答として取得
+            st.session_state.results = results
+            # answer = results[0].get("result")
+            answer = results[0]
+
+        # 5. 回答の表示と保存
+        with st.chat_message("assistant"):
+            st.markdown(answer)
+        st.session_state.messages.append(
+            {"role": "assistant", "content": answer}
+        )
+        st.rerun()
+
+
+if __name__ == "__main__":
+    app_logger = AppLogger(APP_TITLE)
+    app_logger.app_start()
+    side_menus = SideMenus()
+    side_menus.set_user_property_path("results")
+    side_menus.render_api_client_menu()
+    main()
