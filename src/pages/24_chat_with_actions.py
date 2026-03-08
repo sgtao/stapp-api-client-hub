@@ -11,6 +11,13 @@ from logic.ChatService import ChatService
 # APP_TITLE = "Action Config チャットアプリ"
 APP_TITLE = "Chatbot with Action Config"
 
+def initial_session_state():
+    # セッション状態の初期化
+    if "results" not in st.session_state:
+        st.session_state.results = []
+    if "summary_chat" not in st.session_state:
+        st.session_state.summary_chat = ""
+
 
 def main():
     st.page_link("main.py", label="Back to Home", icon="🏠")
@@ -37,14 +44,27 @@ def main():
         with st.chat_message(msg["role"]):
             st.markdown(msg["content"])
 
+    ## 会話履歴
+    with st.expander("Summary of Chat."):
+        st.write(st.session_state.summary_chat)
+
     # 3. ユーザー入力の受付
     if prompt := st.chat_input("何か入力してください"):
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.markdown(prompt)
 
+
         # 4. アクションAPIの実行 (YAMLの指示に従って連鎖実行) [2, 19]
         with st.spinner("思考中..."):
+            messages = []
+            if st.session_state.summary_chat != "":
+                messages.append({
+                    "role": "assistant",
+                    "content": st.session_state.summary_chat
+                })
+            messages.append({"role": "user", "content": prompt})
+
             user_input_state = {}
             num_user_inputs = st.session_state.get("num_user_inputs", 0)
             user_input_state["num_inputs"] = num_user_inputs
@@ -55,7 +75,7 @@ def main():
 
             # user_inputs にユーザーの入力を渡す
             results = chat_service.post_messages_with_configs(
-                messages=st.session_state.messages,
+                messages=messages,
                 session_state=user_input_state,
                 action_configs=action_configs,
             )
@@ -64,6 +84,7 @@ def main():
             st.session_state.results = results
             # answer = results[0].get("result")
             answer = results[0]
+            st.session_state.summary_chat = results[-1]
 
         # 5. 回答の表示と保存
         with st.chat_message("assistant"):
@@ -75,6 +96,7 @@ def main():
 
 
 if __name__ == "__main__":
+    initial_session_state()
     app_logger = AppLogger(APP_TITLE)
     app_logger.app_start()
     side_menus = SideMenus()
