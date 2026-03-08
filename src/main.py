@@ -40,6 +40,11 @@ st.page_link(
     label="Go to Serviced Action Config Client page",
     icon="🏃",
 )
+st.page_link(
+    "pages/24_chat_with_actions.py",
+    label="Go to Chatbot with Action Config page",
+    icon="💬",
+)
 
 # ログ表示ページへのリンク
 st.page_link("pages/91_logs_viewer.py", label="View Logs", icon="📄")

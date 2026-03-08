@@ -11,6 +11,7 @@ from logic.ChatService import ChatService
 # APP_TITLE = "Action Config チャットアプリ"
 APP_TITLE = "Chatbot with Action Config"
 
+
 def initial_session_state():
     # セッション状態の初期化
     if "results" not in st.session_state:
@@ -44,9 +45,12 @@ def main():
         with st.chat_message(msg["role"]):
             st.markdown(msg["content"])
 
-    ## 会話履歴
+    # 会話履歴
     with st.expander("Summary of Chat."):
-        st.write(st.session_state.summary_chat)
+        if st.session_state.summary_chat != "":
+            st.write(st.session_state.summary_chat)
+        else:
+            st.info("ここにチャットの要約を記します。")
 
     # 3. ユーザー入力の受付
     if prompt := st.chat_input("何か入力してください"):
@@ -54,15 +58,16 @@ def main():
         with st.chat_message("user"):
             st.markdown(prompt)
 
-
         # 4. アクションAPIの実行 (YAMLの指示に従って連鎖実行) [2, 19]
         with st.spinner("思考中..."):
             messages = []
             if st.session_state.summary_chat != "":
-                messages.append({
-                    "role": "assistant",
-                    "content": st.session_state.summary_chat
-                })
+                messages.append(
+                    {
+                        "role": "assistant",
+                        "content": st.session_state.summary_chat,
+                    }
+                )
             messages.append({"role": "user", "content": prompt})
 
             user_input_state = {}
