@@ -114,14 +114,14 @@ async def create_api_request(request: Request):
     api_logger = AppLogger(f"{APP_NAME}({request.url.path}):")
     api_logger.info_log(f"Create API Request of {request.method}")
 
-    # --- 1. リクエストと設定読み込み ---
-    api_request = {}
     try:
         body_data = await request.json()
         # api_logger.debug_log(f"request body: {body_data}")
     except json.JSONDecodeError:
         raise HTTPException(status_code=400, detail="Invalid JSON format")
 
+    # --- 1. リクエストと設定読み込み ---
+    api_request = {}
     num_user_inputs = body_data.get("num_user_inputs", 0)
     user_inputs = body_data.get("user_inputs", {})
 
