@@ -85,12 +85,14 @@ def main():
 
         # API呼び出し
         result_text = chat_service.transcribe_audio_data(audio_bytes)
-        st.write(f"文字起こし結果: {result_text}")
+        st.write("Transcribed text:")
+        st.code(result_text)
 
     if prompt and prompt.text:
-        st.session_state.messages.append({"role": "user", "content": prompt})
+        # st.write(prompt)
+        st.session_state.messages.append({"role": "user", "content": prompt.text})
         with st.chat_message("user"):
-            st.markdown(prompt)
+            st.markdown(prompt.text)
 
         # 4. アクションAPIの実行 (YAMLの指示に従って連鎖実行) [2, 19]
         with st.spinner("思考中..."):
@@ -102,7 +104,7 @@ def main():
                         "content": st.session_state.summary_chat,
                     }
                 )
-            messages.append({"role": "user", "content": prompt})
+            messages.append({"role": "user", "content": prompt.text})
 
             user_input_state = {}
             num_user_inputs = st.session_state.get("num_user_inputs", 0)
