@@ -17,6 +17,7 @@ from logic.ResponseOperator import ResponseOperator
 from logic.utils.read_yaml_file import read_yaml_file
 from logic.utils.create_api_request import create_api_request
 from logic.utils.send_api_request import send_api_request
+from logic.utils.transcribe_with_request import transcribe_with_requests
 
 APP_TITLE = "ChatService"
 
@@ -45,6 +46,14 @@ class ChatService:
             return os.getenv("API_KEY")
         else:
             return ""
+
+    def transcribe_audio_data(self, audio_data, api_key="DUMMY"):
+        if api_key == "DUMMY":
+            _api_key = self.get_apikey()
+        else:
+            _api_key = api_key
+
+        return transcribe_with_requests(audio_data, _api_key)
 
     def read_action_config(self, config_file_path):
         config_data = read_yaml_file(config_file_path)

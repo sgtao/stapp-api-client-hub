@@ -1,8 +1,10 @@
+import tempfile
+
+# import os
 import streamlit as st
 
 from ui.SideMenus import SideMenus
 
-# from functions.ApiRequestor import ApiRequestor
 from logic.AppLogger import AppLogger
 from logic.ChatService import ChatService
 
@@ -18,6 +20,21 @@ def initial_session_state():
         st.session_state.results = []
     if "summary_chat" not in st.session_state:
         st.session_state.summary_chat = ""
+
+
+def save_audio_data(audio):
+    # 音声データがあれば一時ファイルとして保存
+    audio_data = audio.getvalue()
+    if audio_data:
+        # .wav や .mp3 など、元の形式に合わせる場合は suffix を調整してください
+        with tempfile.NamedTemporaryFile(
+            delete=False, suffix=".wav"
+        ) as tmp_file:
+            tmp_file.write(audio_data)
+            st.session_state.audio_file_path = tmp_file.name  # パスを保存！
+            return tmp_file.name
+    else:
+        return None
 
 
 def main():
@@ -53,7 +70,24 @@ def main():
             st.info("ここにチャットの要約を記します。")
 
     # 3. ユーザー入力の受付
-    if prompt := st.chat_input("何か入力してください"):
+    # if prompt := st.chat_input("何か入力してください"):
+    prompt = st.chat_input(
+        placeholder="何か入力してください",
+        accept_audio=True,
+    )
+
+    if prompt and prompt.audio:
+        st.audio(prompt.audio)
+        # audio_file_path = save_audio_data(prompt.audio)
+        # st.code(audio_file_path)
+        # prompt.audio.getvalue() は bytes 型なのでそのまま渡せる
+        audio_bytes = prompt.audio.getvalue()
+
+        # API呼び出し
+        result_text = chat_service.transcribe_audio_data(audio_bytes)
+        st.write(f"文字起こし結果: {result_text}")
+
+    if prompt and prompt.text:
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.markdown(prompt)
