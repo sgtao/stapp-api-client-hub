@@ -108,59 +108,81 @@ def make_session_state(config):
 async def create_api_request(request: Request):
     """
     リクエストからAPIリクエストの情報を抽出します。
-    :param request: FastAPIのRequestオブジェクト
-    :return: APIリクエストの情報 (辞書形式)
     """
     api_logger = AppLogger(f"{APP_NAME}({request.url.path}):")
     api_logger.info_log(f"Create API Request of {request.method}")
 
     try:
         body_data = await request.json()
-        # api_logger.debug_log(f"request body: {body_data}")
     except json.JSONDecodeError:
         raise HTTPException(status_code=400, detail="Invalid JSON format")
 
-    # --- 1. リクエストと設定読み込み ---
-    api_request = {}
-    num_user_inputs = body_data.get("num_user_inputs", 0)
-    user_inputs = body_data.get("user_inputs", {})
+    try:
+        # construct_request_from_body 内で例外が発生しても適切に上位へ伝える
+        return construct_request_from_body(body_data)
+    except Exception as e:
+        # 元の例外が HTTPException ならそのまま、それ以外なら 500 でラップ
+        if isinstance(e, HTTPException):
+            raise e
+        api_logger.error_log(f"Internal Error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 
+
+def construct_request_from_body(body_data):
+    # --- 1. 設定の読み込みとセッション構築 ---
     config_file_path = body_data.get("config_file")
     if not config_file_path:
         raise HTTPException(status_code=400, detail="Missing 'config_file'")
+
     config_data = read_yaml_file(config_file_path)
     config_data["api_key"] = get_apikey()
+
     session_state = make_session_state(config_data)
-    # print(f"session_state: {session_state}")
+
+    # ユーザー入力の動的マッピング
+    num_user_inputs = body_data.get("num_user_inputs", 0)
+    user_inputs = body_data.get("user_inputs", {})
     session_state["num_inputs"] = num_user_inputs
+
     for i in range(num_user_inputs):
-        session_state[f"user_input_{i}"] = user_inputs.get(
-            f"user_input_{i}", ""
+        key = f"user_input_{i}"
+        session_state[key] = user_inputs.get(key, "")
+
+    # 必須項目のチェック（KeyError防止）
+    api_url = session_state.get("uri")
+    method = session_state.get("method", "POST")
+    if not api_url:
+        raise HTTPException(
+            status_code=500, detail="API URI is not defined in config"
         )
 
-    api_url = session_state["uri"]
-    method = session_state["method"]
     headers = convert_config_to_header(session_state)
-    req_body = session_state.get("req_body", {}) if method != "GET" else {}
-    # print(f"Original req_body: {req_body}")
 
-    # arrange messages in req_body with request.body.messages
-    _messages = req_body.get("messages", [])
-    _body_msgs = body_data.get("messages", [])
-    for msg in _body_msgs:
-        _messages.append(msg)
-    req_body["messages"] = _messages
+    # --- 2. リクエストボディの組み立て ---
+    # 元の req_body を破壊しないよう、新しいリストとしてメッセージを結合
+    base_req_body = (
+        session_state.get("req_body", {}) if method != "GET" else {}
+    )
 
+    # メッセージの結合（元のリストを汚染しない手法）
+    current_messages = list(base_req_body.get("messages", []))  # コピーを作成
+    input_messages = body_data.get("messages", [])
+    combined_messages = current_messages + input_messages
+
+    # ボディの作成（shallow copy）
+    req_body = {**base_req_body, "messages": combined_messages}
+
+    # --- 3. 動的入力の置換処理 ---
     if session_state.get("use_dynamic_inputs", False):
         api_requestor = ApiRequestor()
         api_url = api_requestor.replace_uri(session_state, api_url)
+
+        # 辞書のまま渡すか、必要ならここでdumpsする
         replaced = replace_body(session_state, json.dumps(req_body))
 
         if isinstance(replaced, str):
-            # JSON文字列ならパース
             req_body = json.loads(replaced)
         elif isinstance(replaced, dict):
-            # 既にdictならそのまま
             req_body = replaced
         else:
             raise HTTPException(
@@ -168,14 +190,10 @@ async def create_api_request(request: Request):
                 detail=f"Unexpected type from replace_body: {type(replaced)}",
             )
 
-        # print(f"Replaced req_body: {req_body}")
-
-    api_request = {
+    return {
         "url": api_url,
         "method": method,
         "headers": headers,
         "req_body": req_body,
         "response_path": session_state.get("user_property_path"),
     }
-
-    return api_request
