@@ -140,10 +140,10 @@ class ClientController:
             return {}
 
     def set_session_state(self, config):
-        if "session_state" not in config:
-            return
-
         cfg_session_state = config.get("session_state", {})
+        if "single_config" in config:
+            cfg_session_state = config.get("single_config", {})
+
         # "method": st.session_state.method,
         # "uri": st.session_state.uri,
         # "header_df": st.session_state.header_df,
