@@ -97,11 +97,14 @@ def main():
         # 4. アクションAPIの実行 (YAMLの指示に従って連鎖実行) [2, 19]
         with st.spinner("思考中..."):
             messages = []
+            assistant_content = st.session_state.summary_chat
+            if len(messages) > 0:
+                assistant_content += messages[-1].content
             if st.session_state.summary_chat != "":
                 messages.append(
                     {
                         "role": "assistant",
-                        "content": st.session_state.summary_chat,
+                        "content": assistant_content
                     }
                 )
             messages.append({"role": "user", "content": prompt.text})
