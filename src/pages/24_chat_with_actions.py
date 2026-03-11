@@ -90,7 +90,9 @@ def main():
 
     if prompt and prompt.text:
         # st.write(prompt)
-        st.session_state.messages.append({"role": "user", "content": prompt.text})
+        st.session_state.messages.append(
+            {"role": "user", "content": prompt.text}
+        )
         with st.chat_message("user"):
             st.markdown(prompt.text)
 
@@ -102,10 +104,7 @@ def main():
                 assistant_content += messages[-1].content
             if st.session_state.summary_chat != "":
                 messages.append(
-                    {
-                        "role": "assistant",
-                        "content": assistant_content
-                    }
+                    {"role": "assistant", "content": assistant_content}
                 )
             messages.append({"role": "user", "content": prompt.text})
 
