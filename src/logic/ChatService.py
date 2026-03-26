@@ -15,7 +15,7 @@ from logic.AppLogger import AppLogger
 from logic.ClientConfigManager import ClientConfigManager
 from logic.ResponseOperator import ResponseOperator
 from logic.utils.read_yaml_file import read_yaml_file
-from logic.utils.create_api_request import create_api_request
+from logic.utils.create_api_request import construct_request_from_body
 from logic.utils.send_api_request import send_api_request
 from logic.utils.transcribe_with_request import transcribe_with_requests
 
@@ -278,15 +278,24 @@ class ChatService:
         except json.JSONDecodeError:
             raise HTTPException(status_code=400, detail="Invalid JSON format")
 
+        # --- 2. ChatServiceを使ったリクエスト ---
         try:
+            # send message:
+            results = await self.process_request_body(body_data)
+            return results
+        except Exception as e:
+            raise HTTPException(
+                status_code=502, detail=f"APIリクエスト失敗: {e}"
+            )
 
+    async def process_request_body(self, body_data):
+        # --- 1. リクエスト情報を解析 ---
+        try:
             # print(f"body_data: {body_data}")
-
             post_data = self.prepare_post_data(body_data)
             session_state = post_data["session_state"]
             messages = post_data["messages"]
             action_configs = post_data["action_configs"]
-
             # print(f"action_config: {action_configs}")
 
         except Exception as e:
@@ -304,7 +313,8 @@ class ChatService:
         if _type == "single":
             results = []
             try:
-                api_request = await create_api_request(request)
+                # api_request = await create_api_request(request)
+                api_request = await construct_request_from_body(body_data)
                 result = await send_api_request(**api_request)
                 results.append(result)
                 return results
