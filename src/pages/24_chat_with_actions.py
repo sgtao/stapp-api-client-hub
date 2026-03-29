@@ -1,9 +1,12 @@
 import tempfile
+import time
 
 # import os
+
 import streamlit as st
 
 from ui.SideMenus import SideMenus
+from ui.SpeechTranscriptor import SpeechTranscriptor
 
 from logic.AppLogger import AppLogger
 from logic.ChatService import ChatService
@@ -12,6 +15,62 @@ from logic.ChatService import ChatService
 
 # APP_TITLE = "Action Config チャットアプリ"
 APP_TITLE = "Chatbot with Action Config"
+
+
+class InputController:
+    def __init__(self) -> None:
+        if "api_running" not in st.session_state:
+            st.session_state.api_running = False
+
+    @st.dialog("Setting Info.")
+    def modal(self, type):
+        st.write(f"Modal for {type}:")
+        if type == "audio":
+            self.render_audio_input()
+            self._modal_closer()
+        else:
+            st.write("No Definition.")
+            self._modal_closer()
+
+    def _modal_closer(self):
+        if st.button(label="Close Modal"):
+            st.info("モーダルを閉じます...")
+            time.sleep(1)
+            st.rerun()
+
+    def _clear_states(self):
+        st.session_state.api_running = False
+
+    def render_audio_input(self):
+        speech_transcriptor = SpeechTranscriptor()
+        transcript = speech_transcriptor.render_transcriptor()
+        if transcript:
+            st.code(transcript)
+
+    def render_buttons(self):
+        st.write("##### Runner Ctrl.")
+        cols = st.columns(8)
+        with cols[0]:
+            if st.button(
+                help="Audio Input",
+                label="🎤",
+                disabled=st.session_state.api_running,
+            ):
+                self.modal("audio")
+        with cols[1]:
+            pass
+        with cols[2]:
+            pass
+        with cols[3]:
+            pass
+        with cols[4]:
+            pass
+        with cols[5]:
+            pass
+        with cols[6]:
+            pass
+        with cols[7]:
+            pass
 
 
 def initial_session_state():
@@ -51,6 +110,7 @@ def main():
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
+    input_controller = InputController()
     # chat_manager = ChatMessage()
     chat_service = ChatService()
     # Setup to access API-Server
@@ -70,31 +130,37 @@ def main():
             st.info("ここにチャットの要約を記します。")
 
     # 3. ユーザー入力の受付
+    input_controller.render_buttons()
+
     # if prompt := st.chat_input("何か入力してください"):
     prompt = st.chat_input(
         placeholder="何か入力してください",
-        accept_audio=True,
+        # accept_audio=True,
     )
 
-    if prompt and prompt.audio:
-        st.audio(prompt.audio)
-        # audio_file_path = save_audio_data(prompt.audio)
-        # st.code(audio_file_path)
-        # prompt.audio.getvalue() は bytes 型なのでそのまま渡せる
-        audio_bytes = prompt.audio.getvalue()
+    # 音声入力切り替えのためコメントアウト：SpeechTranscriptor利用のため
+    # if prompt and prompt.audio:
+    #     st.audio(prompt.audio)
+    #     # audio_file_path = save_audio_data(prompt.audio)
+    #     # st.code(audio_file_path)
+    #     # prompt.audio.getvalue() は bytes 型なのでそのまま渡せる
+    #     audio_bytes = prompt.audio.getvalue()
 
-        # API呼び出し
-        result_text = chat_service.transcribe_audio_data(audio_bytes)
-        st.write("Transcribed text:")
-        st.code(result_text)
+    #     # API呼び出し
+    #     result_text = chat_service.transcribe_audio_data(audio_bytes)
+    #     st.write("Transcribed text:")
+    #     st.code(result_text)
 
-    if prompt and prompt.text:
+    # if prompt and prompt.text:
+    if prompt:
         # st.write(prompt)
         st.session_state.messages.append(
-            {"role": "user", "content": prompt.text}
+            # {"role": "user", "content": prompt.text}
+            {"role": "user", "content": prompt}
         )
         with st.chat_message("user"):
-            st.markdown(prompt.text)
+            # st.markdown(prompt.text)
+            st.markdown(prompt)
 
         # 4. アクションAPIの実行 (YAMLの指示に従って連鎖実行) [2, 19]
         with st.spinner("思考中..."):
@@ -106,7 +172,8 @@ def main():
                 messages.append(
                     {"role": "assistant", "content": assistant_content}
                 )
-            messages.append({"role": "user", "content": prompt.text})
+            # messages.append({"role": "user", "content": prompt.text})
+            messages.append({"role": "user", "content": prompt})
 
             user_input_state = {}
             num_user_inputs = st.session_state.get("num_user_inputs", 0)
