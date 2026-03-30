@@ -24,7 +24,10 @@ class InputController:
 
     @st.dialog("Setting Info.")
     def modal(self, type):
-        st.write(f"Modal for {type}:")
+        st.subheader(f"Modal for {type}:")
+        st.markdown(
+            "Google API を使用するので**外務インターネットへ接続します。**"
+        )
         if type == "audio":
             self.render_audio_input()
             self._modal_closer()
