@@ -5,6 +5,7 @@ import time
 
 import streamlit as st
 
+from ui.ChatMessage import ChatMessage
 from ui.SideMenus import SideMenus
 from ui.SpeechTranscriptor import SpeechTranscriptor
 
@@ -25,9 +26,7 @@ class InputController:
     @st.dialog("Setting Info.")
     def modal(self, type):
         st.subheader(f"Modal for {type}:")
-        st.markdown(
-            "Google API を使用するので**外務インターネットへ接続します。**"
-        )
+        st.markdown("Google API 使用。**外務インターネットへ接続します。**")
         if type == "audio":
             self.render_audio_input()
             self._modal_closer()
@@ -51,7 +50,7 @@ class InputController:
             st.code(transcript)
 
     def render_buttons(self):
-        st.write("##### Runner Ctrl.")
+        st.write("###### Input Options:")
         cols = st.columns(8)
         with cols[0]:
             if st.button(
@@ -80,6 +79,8 @@ def initial_session_state():
     # セッション状態の初期化
     if "results" not in st.session_state:
         st.session_state.results = []
+    if "text_message" not in st.session_state:
+        st.session_state.text_message = ""
     if "summary_chat" not in st.session_state:
         st.session_state.summary_chat = ""
 
@@ -104,10 +105,10 @@ def main():
 
     st.title(f"💬+🏃 {APP_TITLE}")
     st.info(
-        """チャットしながら履歴要約を表示します
-            - `102_chat_with_response_summary.yaml`を利用
-            - 事前に3000 port で `single` config のAPI-Serverを起動して下さい
-            """
+        """会話履歴を要約を使ってチャットします。\n
+    - `assets/actions/102_chat_with_response_summary.yaml`を利用します\n
+    - 事前に3000 port で `single` config のAPI-Serverを起動して下さい
+    """
     )
     # 1. セッション状態の初期化 [14-16]
     if "messages" not in st.session_state:
@@ -116,29 +117,32 @@ def main():
     input_controller = InputController()
     # chat_manager = ChatMessage()
     chat_service = ChatService()
+    message = ChatMessage()
     # Setup to access API-Server
     config_file_path = "assets/actions/102_chat_with_response_summary.yaml"
     action_configs = chat_service.read_action_config(config_file_path)
 
-    # 2. チャット履歴の表示
-    for msg in st.session_state.messages:
-        with st.chat_message(msg["role"]):
-            st.markdown(msg["content"])
+    # Chat with Config
+    with st.container(height="stretch"):
+        # 2. チャット履歴の表示
+        # for msg in st.session_state.messages:
+        #     with st.chat_message(msg["role"]):
+        #         st.markdown(msg["content"])
+        message.display_chat_history()
 
-    # 会話履歴
-    with st.expander("Summary of Chat."):
-        if st.session_state.summary_chat != "":
-            st.write(st.session_state.summary_chat)
-        else:
-            st.info("ここにチャットの要約を記します。")
+        # 会話履歴
+        with st.expander("Summary of Chat."):
+            if st.session_state.summary_chat != "":
+                st.write(st.session_state.summary_chat)
+            else:
+                st.info("ここにチャットの要約を記します。")
 
     # 3. ユーザー入力の受付
     input_controller.render_buttons()
-
-    # if prompt := st.chat_input("何か入力してください"):
-    prompt = st.chat_input(
-        placeholder="何か入力してください",
-        # accept_audio=True,
+    prompt = st.text_input(
+        label="User Message",
+        placeholder="Please input message , and press `submit`",
+        value=st.session_state.text_message,
     )
 
     # 音声入力切り替えのためコメントアウト：SpeechTranscriptor利用のため
@@ -155,7 +159,12 @@ def main():
     #     st.code(result_text)
 
     # if prompt and prompt.text:
-    if prompt:
+    if st.button("submit", icon="🏃"):
+        if prompt == "":
+            st.warning("Please input message, before submit")
+            time.sleep(3)
+            return
+
         # st.write(prompt)
         st.session_state.messages.append(
             # {"role": "user", "content": prompt.text}
@@ -177,6 +186,7 @@ def main():
                 )
             # messages.append({"role": "user", "content": prompt.text})
             messages.append({"role": "user", "content": prompt})
+            st.session_state.text_message = ""
 
             user_input_state = {}
             num_user_inputs = st.session_state.get("num_user_inputs", 0)
@@ -205,6 +215,7 @@ def main():
         st.session_state.messages.append(
             {"role": "assistant", "content": answer}
         )
+        st.session_state.text_message = ""
         st.rerun()
 
 

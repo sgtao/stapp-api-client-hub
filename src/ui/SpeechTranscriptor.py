@@ -25,7 +25,7 @@ class SpeechTranscriptor:
 
     def _render_audio_input(self) -> bytes | None:
         audio_file = st.audio_input(
-            "Record (Google の無料 API を使用して文字起こしをします。)"
+            "Record (開始->発話->停止をすると、文字起こしします。)"
         )
         if audio_file is None:
             return None
