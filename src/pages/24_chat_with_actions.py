@@ -29,7 +29,6 @@ class InputController:
         st.markdown("Google API 使用。**外務インターネットへ接続します。**")
         if type == "audio":
             self.render_audio_input()
-            self._modal_closer()
         else:
             st.write("No Definition.")
             self._modal_closer()
@@ -45,9 +44,21 @@ class InputController:
 
     def render_audio_input(self):
         speech_transcriptor = SpeechTranscriptor()
-        transcript = speech_transcriptor.render_transcriptor()
+        transcript = speech_transcriptor.render_transcriptor(display=False)
         if transcript:
             st.code(transcript)
+        col_l, col_r = st.columns(2)
+        with col_l:
+            if transcript:
+                if st.button("Copy to prompt", type="primary"):
+                    # previous_msg = st.session_state.text_message
+                    # st.session_state.text_message = previous_msg + transcript
+                    st.session_state.text_message = transcript
+                    st.info("モーダルを閉じます...")
+                    time.sleep(1)
+                    st.rerun()
+        with col_r:
+            self._modal_closer()
 
     def render_buttons(self):
         st.write("###### Input Options:")
@@ -80,7 +91,7 @@ def initial_session_state():
     if "results" not in st.session_state:
         st.session_state.results = []
     if "text_message" not in st.session_state:
-        st.session_state.text_message = ""
+        st.session_state.text_message = None
     if "summary_chat" not in st.session_state:
         st.session_state.summary_chat = ""
 
@@ -139,11 +150,13 @@ def main():
 
     # 3. ユーザー入力の受付
     input_controller.render_buttons()
-    prompt = st.text_input(
+    prompt = st.text_area(
         label="User Message",
         placeholder="Please input message , and press `submit`",
         value=st.session_state.text_message,
     )
+    if prompt is not None:
+        st.session_state.text_message = prompt
 
     # 音声入力切り替えのためコメントアウト：SpeechTranscriptor利用のため
     # if prompt and prompt.audio:
@@ -186,7 +199,7 @@ def main():
                 )
             # messages.append({"role": "user", "content": prompt.text})
             messages.append({"role": "user", "content": prompt})
-            st.session_state.text_message = ""
+            st.session_state.text_message = None
 
             user_input_state = {}
             num_user_inputs = st.session_state.get("num_user_inputs", 0)
@@ -215,7 +228,7 @@ def main():
         st.session_state.messages.append(
             {"role": "assistant", "content": answer}
         )
-        st.session_state.text_message = ""
+        st.session_state.text_message = None
         st.rerun()
 
 

@@ -32,7 +32,7 @@ class SpeechTranscriptor:
         st.audio(audio_file)
         return audio_file.read()
 
-    def render_transcriptor(self) -> str | None:
+    def render_transcriptor(self, display=True) -> str | None:
         """言語セレクタ・録音ウィジェットを表示し、文字起こし結果を返す。
 
         Returns:
@@ -53,12 +53,13 @@ class SpeechTranscriptor:
             try:
                 text = transcriptor.transcribe(audio_bytes)
                 if text:
-                    st.subheader("Transcript:")
-                    st.text_area(
-                        label=f"DateTime: {datetime_str}",
-                        value=text,
-                        height=200,
-                    )
+                    if display:
+                        st.subheader("Transcript:")
+                        st.text_area(
+                            label=f"DateTime: {datetime_str}",
+                            value=text,
+                            height=200,
+                        )
                     return text
             except Exception as e:
                 st.warning(f"{datetime_str}: {e}")
