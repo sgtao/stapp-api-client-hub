@@ -6,6 +6,7 @@ import time
 import streamlit as st
 
 from ui.ChatMessage import ChatMessage
+from ui.ChatModal import ChatModal
 from ui.SideMenus import SideMenus
 from ui.SpeechTranscriptor import SpeechTranscriptor
 
@@ -247,6 +248,27 @@ def main():
         )
         st.session_state.text_message = None
         st.rerun()
+
+    # page footer
+    cols = st.columns(5)
+    with cols[0]:
+        if st.button(
+            label="",
+            help="Copy Response",
+            icon="📋",
+        ):
+            ChatModal().modal(
+                type="copy_response", messages=message.get_messages()
+            )
+
+    with cols[1]:
+        pass
+    with cols[2]:
+        pass
+    with cols[3]:
+        pass
+    with cols[4]:
+        pass
 
 
 if __name__ == "__main__":
