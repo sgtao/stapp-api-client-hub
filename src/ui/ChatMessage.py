@@ -12,15 +12,15 @@ class ChatMessage:
         """あなたは聡明なAIです。ユーザの入力に全て日本語で返答を生成してください"""
     )
 
-    def __init__(self, system_prompt: str = system_prompt):
+    def __init__(self):
         if "messages" not in st.session_state:
-            self.reset()
+            st.session_state.messages = []
 
-    def reset(self):
+    def reset(self, system_prompt: str = system_prompt):
         st.session_state.messages = [
             {
                 "role": "system",
-                "content": self.system_prompt,
+                "content": system_prompt,
             },
         ]
 
