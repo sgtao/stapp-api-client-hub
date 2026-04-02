@@ -50,11 +50,28 @@ class InputController:
         col_l, col_r = st.columns(2)
         with col_l:
             if transcript:
-                if st.button("Copy to prompt", type="primary"):
-                    # previous_msg = st.session_state.text_message
-                    # st.session_state.text_message = previous_msg + transcript
-                    st.session_state.text_message = transcript
-                    st.info("モーダルを閉じます...")
+                if st.button("Append to prompt", type="primary"):
+                    # 現在の入力を取得（未入力なら空文字）
+                    raw_msg = st.session_state.get("text_message", "")
+                    previous_msg = (
+                        raw_msg if raw_msg is not None else ""
+                    ).strip()
+                    # 整形処理：各行の無駄な空白を削除
+                    clean_transcript = "\n".join(
+                        [
+                            line.strip()
+                            for line in transcript.strip().split("\n")
+                        ]
+                    )
+
+                    # 追記するフォーマットを作成
+                    # f-string内のインデントが反映されないよう左寄せにするのがコツです
+                    append_text = f"\n---\n{clean_transcript}\n"
+
+                    # セッション状態を更新
+                    st.session_state.text_message = previous_msg + append_text
+
+                    st.info("コピーしました。モーダルを閉じます...")
                     time.sleep(1)
                     st.rerun()
         with col_r:
