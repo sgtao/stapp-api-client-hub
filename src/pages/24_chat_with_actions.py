@@ -125,6 +125,12 @@ class InputController:
         with col_r:
             self._modal_closer()
 
+    def get_image_data(self):
+        return st.session_state.image_data
+
+    def get_image_base64(self):
+        return st.session_state.image_base64
+
     def render_buttons(self):
         st.write("###### Input Options:")
         cols = st.columns(10)
@@ -156,21 +162,6 @@ def initial_session_state():
         st.session_state.text_message = None
     if "summary_chat" not in st.session_state:
         st.session_state.summary_chat = ""
-
-
-def save_audio_data(audio):
-    # 音声データがあれば一時ファイルとして保存
-    audio_data = audio.getvalue()
-    if audio_data:
-        # .wav や .mp3 など、元の形式に合わせる場合は suffix を調整してください
-        with tempfile.NamedTemporaryFile(
-            delete=False, suffix=".wav"
-        ) as tmp_file:
-            tmp_file.write(audio_data)
-            st.session_state.audio_file_path = tmp_file.name  # パスを保存！
-            return tmp_file.name
-    else:
-        return None
 
 
 def main():
@@ -209,6 +200,10 @@ def main():
 
     # 3. ユーザー入力の受付
     input_controller.render_buttons()
+    image_data = input_controller.get_image_data()
+    if image_data is not None:
+        st.image(image_data)
+
     prompt = st.text_area(
         label="User Message",
         placeholder="Please input message , and press `submit`",
@@ -216,19 +211,6 @@ def main():
     )
     if prompt is not None:
         st.session_state.text_message = prompt
-
-    # 音声入力切り替えのためコメントアウト：SpeechTranscriptor利用のため
-    # if prompt and prompt.audio:
-    #     st.audio(prompt.audio)
-    #     # audio_file_path = save_audio_data(prompt.audio)
-    #     # st.code(audio_file_path)
-    #     # prompt.audio.getvalue() は bytes 型なのでそのまま渡せる
-    #     audio_bytes = prompt.audio.getvalue()
-
-    #     # API呼び出し
-    #     result_text = chat_service.transcribe_audio_data(audio_bytes)
-    #     st.write("Transcribed text:")
-    #     st.code(result_text)
 
     # if prompt and prompt.text:
     if st.button("submit", icon="🏃"):
@@ -238,10 +220,6 @@ def main():
             return
 
         # st.write(prompt)
-        st.session_state.messages.append(
-            # {"role": "user", "content": prompt.text}
-            {"role": "user", "content": prompt}
-        )
         with st.chat_message("user"):
             # st.markdown(prompt.text)
             st.markdown(prompt)
@@ -256,7 +234,7 @@ def main():
                 messages.append(
                     {"role": "assistant", "content": assistant_content}
                 )
-            # messages.append({"role": "user", "content": prompt.text})
+
             messages.append({"role": "user", "content": prompt})
             st.session_state.text_message = None
 
@@ -288,6 +266,8 @@ def main():
             {"role": "assistant", "content": answer}
         )
         st.session_state.text_message = None
+        st.session_state.image_base64 = None
+        st.session_state.image_data = None
         st.rerun()
 
     # page footer
