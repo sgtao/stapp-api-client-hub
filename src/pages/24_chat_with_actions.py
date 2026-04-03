@@ -107,33 +107,27 @@ class InputController:
             img_byte_arr = io.BytesIO()
             paste_result.image_data.save(img_byte_arr, format="PNG")
             process_image.set_image_data(img_byte_arr.getvalue())
-            resized_image = process_image.resize_image()
-            st.session_state.image_data = resized_image
+            process_image.resize_image()
 
         # session_stateから表示（再描画時にも対応）
-        if st.session_state.image_data is not None:
-            st.success("画像が保存されました")
-            st.image(st.session_state.image_data)
-            st.session_state.image_base64 = process_image.convert_to_base64(
-                st.session_state.image_data
-            )
-            st.code(
-                st.session_state.image_base64[:100] + "..."
-            )  # 先頭だけ表示
+        if process_image.get_resized_image() is not None:
+            st.success("画像を縮小しました。")
+            st.image(process_image.get_resized_image())
 
         col_l, col_r = st.columns(2)
         with col_l:
-            if (
-                st.session_state.image_data is not None
-            ):  # pasted_image → image_data
+            if process_image.get_resized_image() is not None:
                 if st.button("確定して閉じる", type="primary"):
+                    st.session_state.image_data = process_image.get_resized_image() 
+                    st.session_state.image_base64 = \
+                        process_image.convert_to_base64(st.session_state.image_data)
                     st.rerun()
         with col_r:
             self._modal_closer()
 
     def render_buttons(self):
         st.write("###### Input Options:")
-        cols = st.columns(8)
+        cols = st.columns(10)
         with cols[0]:
             if st.button(
                 help="Audio Input",
@@ -148,19 +142,11 @@ class InputController:
                 disabled=st.session_state.api_running,
             ):
                 self.modal("image")
-        with cols[2]:
-            pass
-        with cols[3]:
-            pass
-        with cols[4]:
-            pass
-        with cols[5]:
-            pass
-        with cols[6]:
-            pass
-        with cols[7]:
-            pass
 
+        # remain cols
+        for _col in cols[2:]:
+            with _col:
+                pass
 
 def initial_session_state():
     # セッション状態の初期化
@@ -266,7 +252,7 @@ def main():
             assistant_content = st.session_state.summary_chat
             if len(messages) > 0:
                 assistant_content += messages[-1].content
-            if st.session_state.summary_chat != "":
+            if assistant_content != "":
                 messages.append(
                     {"role": "assistant", "content": assistant_content}
                 )

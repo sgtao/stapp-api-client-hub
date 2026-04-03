@@ -7,6 +7,7 @@ from PIL import Image  # 追加
 class ProcessImage:
     def __init__(self):
         self.image_data = None
+        self.resized_image = None
 
     def set_image_data(self, image_data):
         self.image_data = image_data
@@ -30,7 +31,11 @@ class ProcessImage:
         # リサイズした画像をバイトデータに変換
         output = io.BytesIO()
         resized_image.save(output, format="PNG")
-        return output.getvalue()
+        self.resized_image = output.getvalue()
+        return self.resized_image
+
+    def get_resized_image(self):
+        return self.resized_image
 
     def convert_to_base64(self, image_bytes):
         """画像データをbase64エンコードする関数"""
