@@ -1,9 +1,12 @@
 import tempfile
 import time
 
+import io
+
 # import os
 
 import streamlit as st
+from streamlit_paste_button import paste_image_button as pbutton
 
 from ui.ChatMessage import ChatMessage
 from ui.ChatModal import ChatModal
@@ -12,6 +15,7 @@ from ui.SpeechTranscriptor import SpeechTranscriptor
 
 from logic.AppLogger import AppLogger
 from logic.ChatService import ChatService
+from logic.ProcessImage import ProcessImage
 
 # from ui.ChatMessage import ChatMessage
 
@@ -23,13 +27,20 @@ class InputController:
     def __init__(self) -> None:
         if "api_running" not in st.session_state:
             st.session_state.api_running = False
+        if "pasted_image" not in st.session_state:
+            st.session_state.pasted_image = None
+        if "image_data" not in st.session_state:
+            st.session_state.image_data = None
+        if "image_base64" not in st.session_state:
+            st.session_state.image_base64 = None
 
     @st.dialog("Setting Info.")
     def modal(self, type):
         st.subheader(f"Modal for {type}:")
-        st.markdown("Google API 使用。**外務インターネットへ接続します。**")
         if type == "audio":
             self.render_audio_input()
+        elif type == "image":
+            self.render_image_paste()
         else:
             st.write("No Definition.")
             self._modal_closer()
@@ -44,6 +55,7 @@ class InputController:
         st.session_state.api_running = False
 
     def render_audio_input(self):
+        st.markdown("Google API 使用。**外務インターネットへ接続します。**")
         speech_transcriptor = SpeechTranscriptor()
         transcript = speech_transcriptor.render_transcriptor(display=False)
         if transcript:
@@ -78,6 +90,47 @@ class InputController:
         with col_r:
             self._modal_closer()
 
+    def render_image_paste(self):
+        process_image = ProcessImage()
+        st.markdown(
+            "画像を貼り付けると、サイズ変更してBase64コードへ変換します。"
+        )
+        paste_result = pbutton(
+            label="📋 Paste Image data",
+            text_color="#ffffff",
+            background_color="#3498db",
+            hover_background_color="#2980b9",
+            key="paste_button",
+        )
+
+        if paste_result.image_data is not None:
+            img_byte_arr = io.BytesIO()
+            paste_result.image_data.save(img_byte_arr, format="PNG")
+            process_image.set_image_data(img_byte_arr.getvalue())
+            resized_image = process_image.resize_image()
+            st.session_state.image_data = resized_image
+
+        # session_stateから表示（再描画時にも対応）
+        if st.session_state.image_data is not None:
+            st.success("画像が保存されました")
+            st.image(st.session_state.image_data)
+            st.session_state.image_base64 = process_image.convert_to_base64(
+                st.session_state.image_data
+            )
+            st.code(
+                st.session_state.image_base64[:100] + "..."
+            )  # 先頭だけ表示
+
+        col_l, col_r = st.columns(2)
+        with col_l:
+            if (
+                st.session_state.image_data is not None
+            ):  # pasted_image → image_data
+                if st.button("確定して閉じる", type="primary"):
+                    st.rerun()
+        with col_r:
+            self._modal_closer()
+
     def render_buttons(self):
         st.write("###### Input Options:")
         cols = st.columns(8)
@@ -89,7 +142,12 @@ class InputController:
             ):
                 self.modal("audio")
         with cols[1]:
-            pass
+            if st.button(
+                help="Image Paste",
+                label="🖼",
+                disabled=st.session_state.api_running,
+            ):
+                self.modal("image")
         with cols[2]:
             pass
         with cols[3]:
@@ -140,9 +198,6 @@ def main():
     """
     )
     # 1. セッション状態の初期化 [14-16]
-    if "messages" not in st.session_state:
-        st.session_state.messages = []
-
     input_controller = InputController()
     # chat_manager = ChatMessage()
     chat_service = ChatService()
