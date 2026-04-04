@@ -1,0 +1,41 @@
+# 112_explain_image.yaml
+title: explain image with llama-4-scout model
+note: |
+  submit explanation request to llama-4-scount model
+  - using `meta-llama/llama-4-scout-17b-16e-instruct`
+  - `user_input_0`: base64 of png image
+single_config:
+  header_df:
+  - Property: Content-Type
+    Value: application/json
+  - Property: Authorization
+    Value: Bearer ＜API_KEY＞
+  method: POST
+  req_body:
+    model: "meta-llama/llama-4-scout-17b-16e-instruct"
+    messages:
+      - role: "system"
+        content: |
+          あなたは聡明なAIです。ユーザの入力に全て日本語で返答を生成してください。
+          - ユーザーのイメージを詳細に説明してください。
+          - 説明については次のフォーマットで回答してください。
+          ## 回答フォーマット
+          ```
+          ### 画像説明
+          - タイトル：{画像を40文字以内でタイトルをつける
+          - 概要：{画像が主張している概要を200文字以内で解説}
+          - 構成：{スライド／写真／文章などの分類　および　構成部品の補足}
+          - 詳細：{構成の各要素に対して詳細な説明。文章情報は文字起こしして説明}
+          ```
+      - role: "user"
+        content:
+          # - type: "text"
+          #   text: |
+          #     添付画像を補足します。`image_url`を参考に答えてください
+          - type: "image_url"
+            image_url:
+              detail: "auto"
+              url: "data:image/png;base64,＜user_input_0＞"
+  uri: https://api.groq.com/openai/v1/chat/completions
+  use_dynamic_inputs: true
+  user_property_path: choices[0].message.content

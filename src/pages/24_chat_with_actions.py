@@ -1,4 +1,3 @@
-import tempfile
 import time
 
 import io
@@ -6,6 +5,9 @@ import io
 # import os
 
 import streamlit as st
+
+# import streamlit.components.v1 as stc
+
 from streamlit_paste_button import paste_image_button as pbutton
 
 from ui.ChatMessage import ChatMessage
@@ -107,22 +109,34 @@ class InputController:
             img_byte_arr = io.BytesIO()
             paste_result.image_data.save(img_byte_arr, format="PNG")
             process_image.set_image_data(img_byte_arr.getvalue())
-            process_image.resize_image()
+            # process_image.resize_image(target_height=240)
+            process_image.resize_image(target_height=160)
 
         # session_stateから表示（再描画時にも対応）
-        if process_image.get_resized_image() is not None:
+        resized_image = process_image.get_resized_image()
+        if resized_image is not None:
             st.success("画像を縮小しました。")
-            st.image(process_image.get_resized_image())
+            st.image(resized_image)
+            str_base64 = process_image.convert_to_base64(resized_image)
+            # st.write(f"Base64(head 50 char.): {str_base64[:50]}...")
+            st.code(str_base64)
 
-        col_l, col_r = st.columns(2)
-        with col_l:
+        cols = st.columns(3)
+        with cols[0]:
             if process_image.get_resized_image() is not None:
                 if st.button("確定して閉じる", type="primary"):
-                    st.session_state.image_data = process_image.get_resized_image() 
-                    st.session_state.image_base64 = \
-                        process_image.convert_to_base64(st.session_state.image_data)
+                    st.session_state.image_data = (
+                        process_image.get_resized_image()
+                    )
+                    st.session_state.image_base64 = (
+                        process_image.convert_to_base64(
+                            process_image.get_resized_image()
+                        )
+                    )
                     st.rerun()
-        with col_r:
+        with cols[1]:
+            pass
+        with cols[2]:
             self._modal_closer()
 
     def get_image_data(self):
@@ -154,6 +168,7 @@ class InputController:
             with _col:
                 pass
 
+
 def initial_session_state():
     # セッション状態の初期化
     if "results" not in st.session_state:
@@ -167,11 +182,13 @@ def initial_session_state():
 def main():
     st.page_link("main.py", label="Back to Home", icon="🏠")
 
-    st.title(f"💬+🏃 {APP_TITLE}")
+    st.header(f"💬+🏃 {APP_TITLE}")
     st.info(
         """会話履歴を要約を使ってチャットします。\n
     - `assets/actions/102_chat_with_response_summary.yaml`を利用します\n
+    - 画像添付すると`assets/actions/112_chat_with_image_explation.yaml`を利用します\n
     - 事前に3000 port で `single` config のAPI-Serverを起動して下さい
+    - サイドメニューの`user_input`は無視されます
     """
     )
     # 1. セッション状態の初期化 [14-16]
@@ -223,6 +240,8 @@ def main():
         with st.chat_message("user"):
             # st.markdown(prompt.text)
             st.markdown(prompt)
+        user_message = {"role": "user", "content": prompt}
+        st.session_state.messages.append(user_message)
 
         # 4. アクションAPIの実行 (YAMLの指示に従って連鎖実行) [2, 19]
         with st.spinner("思考中..."):
@@ -235,16 +254,26 @@ def main():
                     {"role": "assistant", "content": assistant_content}
                 )
 
-            messages.append({"role": "user", "content": prompt})
+            messages.append(user_message)
             st.session_state.text_message = None
 
             user_input_state = {}
-            num_user_inputs = st.session_state.get("num_user_inputs", 0)
-            user_input_state["num_inputs"] = num_user_inputs
-            for i in range(num_user_inputs):
-                user_input_state[f"user_input_{i}"] = st.session_state.get(
-                    f"user_input_{i}", ""
+            # num_user_inputs = st.session_state.get("num_user_inputs", 0)
+            # user_input_state["num_inputs"] = num_user_inputs
+            # for i in range(num_user_inputs):
+            #     user_input_state[f"user_input_{i}"] = st.session_state.get(
+            #         f"user_input_{i}", ""
+            #     )
+            if image_data is not None:
+                config_file_path = (
+                    "assets/actions/112_chat_with_image_explation.yaml"
                 )
+                user_input_state["num_inputs"] = 1
+                user_input_state["user_input_0"] = (
+                    input_controller.get_image_base64()
+                )
+            else:
+                user_input_state["num_inputs"] = 0
 
             # user_inputs にユーザーの入力を渡す
             results = chat_service.post_messages_with_configs(
@@ -256,7 +285,7 @@ def main():
             # 最終ステップの結果を回答として取得
             st.session_state.results = results
             # answer = results[0].get("result")
-            answer = results[0]
+            answer = results[-3]
             st.session_state.summary_chat = results[-1]
 
         # 5. 回答の表示と保存
@@ -266,8 +295,8 @@ def main():
             {"role": "assistant", "content": answer}
         )
         st.session_state.text_message = None
-        st.session_state.image_base64 = None
-        st.session_state.image_data = None
+        # st.session_state.image_base64 = None
+        # st.session_state.image_data = None
         st.rerun()
 
     # page footer

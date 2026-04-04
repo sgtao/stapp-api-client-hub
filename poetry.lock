@@ -2434,6 +2434,23 @@ sql = ["SQLAlchemy (>=2.0.0)"]
 starlette = ["anyio (>=4.0.0)", "itsdangerous (>=2.1.2)", "python-multipart (>=0.0.10)", "starlette (>=0.40.0)", "uvicorn (>=0.30.0)", "websockets (>=12.0.0)"]
 
 [[package]]
+name = "streamlit-paste-button"
+version = "0.1.2"
+description = "Streamlit component that allows you to paste images from your clipboard into your app with a button click"
+optional = false
+python-versions = ">=3.7"
+groups = ["main"]
+files = [
+    {file = "streamlit-paste-button-0.1.2.tar.gz", hash = "sha256:c06dfd8163bd6eeeba0dc0b8294549395594c04a2854aff899bd261942efb0f0"},
+    {file = "streamlit_paste_button-0.1.2-py3-none-any.whl", hash = "sha256:f65609333ec0169b088cafb5897522354207bf198511552928766b015d65bef2"},
+]
+
+[package.dependencies]
+jinja2 = "*"
+pillow = "*"
+streamlit = ">=1.2"
+
+[[package]]
 name = "taskipy"
 version = "1.14.1"
 description = "tasks runner for python projects"
@@ -2679,4 +2696,4 @@ watchmedo = ["PyYAML (>=3.10)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13,<3.14"
-content-hash = "6cf031325befdc799533f94a5ac717d28fa068fa3b7c34bf2007c299ca21889e"
+content-hash = "3731019908745cb124d28ff8cbcbe075eb23b0a4532bdd07425e7b1b2bc62734"

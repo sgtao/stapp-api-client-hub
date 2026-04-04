@@ -1,0 +1,33 @@
+title: 112_chat_with_image_explation.yaml
+note: |
+  - 画像情報を使ってチャット回答を含めて履歴を要約する
+action_config:
+- type: request
+  config_file: assets/single/112_explain_image.yaml
+  method: POST
+  num_inputs: 1
+  uri: http://localhost:3000/api/v0/single
+  use_dynamic_inputs: true
+  user_input_0: "＜action_result_1＞"
+  user_property_path: results
+- type: request
+  config_file: assets/single/003_submit_message_with_suppliment.yaml
+  method: POST
+  num_inputs: 2
+  uri: http://localhost:3000/api/v0/messages
+  use_dynamic_inputs: true
+  user_input_0: "openai/gpt-oss-120b"
+  user_input_1: "＜action_result_0＞"
+  user_property_path: results
+- type: append_message
+  role: "assistant"
+  content: "＜action_result_1＞"
+- type: request
+  config_file: assets/single/102_summarize_messages.yaml
+  method: POST
+  num_inputs: 1
+  uri: http://localhost:3000/api/v0/single
+  use_dynamic_inputs: true
+  user_input_0: "openai/gpt-oss-20b"
+  user_property_path: results
+view_mode: "📋 Copy Tail"

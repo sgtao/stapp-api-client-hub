@@ -15,6 +15,9 @@ class ProcessImage:
     def get_image_data(self):
         return self.image_data
 
+    def get_resized_image(self):
+        return self.resized_image
+
     def resize_image(self, target_height=320):
         """画像データを処理して指定された高さにリサイズする関数"""
         if self.image_data is None:
@@ -34,9 +37,6 @@ class ProcessImage:
         self.resized_image = output.getvalue()
         return self.resized_image
 
-    def get_resized_image(self):
-        return self.resized_image
-
-    def convert_to_base64(self, image_bytes):
+    def convert_to_base64(self, image_bytes=None):
         """画像データをbase64エンコードする関数"""
         return base64.b64encode(image_bytes).decode("utf-8")
