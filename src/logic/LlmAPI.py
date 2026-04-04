@@ -34,7 +34,7 @@ class LlmAPI:
         # print(f"req_body: {_req_body}")
         self.req_body = json.loads(_req_body)
 
-    def response(self, messages=[]):
+    def request(self, messages=[]):
         headers = self.header_dict.copy()
         payload = self.req_body
         # st.write(f"payload: {payload}")
@@ -63,7 +63,7 @@ class LlmAPI:
 
     def single_response(self, messages=[]):
         try:
-            response = self.response(messages)
+            response = self.request(messages)
             # return response.json()["choices"][0]["message"]["content"]
             response_json = response.json()
             return self.response_op.extract_property_from_json(
