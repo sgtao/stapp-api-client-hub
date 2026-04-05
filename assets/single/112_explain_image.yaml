@@ -29,9 +29,9 @@ single_config:
           ```
       - role: "user"
         content:
-          # - type: "text"
-          #   text: |
-          #     添付画像を補足します。`image_url`を参考に答えてください
+          - type: "text"
+            text: |
+              添付画像を補足します。`image_url`を参考に答えてください
           - type: "image_url"
             image_url:
               detail: "auto"

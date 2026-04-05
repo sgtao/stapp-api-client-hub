@@ -36,6 +36,18 @@ class InputController:
         if "image_base64" not in st.session_state:
             st.session_state.image_base64 = None
 
+    def get_input_data(self):
+        return st.session_state.image_data
+
+    def set_api_running(self):
+        st.session_state.api_running = True
+
+    def clear_states(self):
+        st.session_state.api_running = False
+        st.session_state.pasted_image = None
+        st.session_state.image_data = None
+        st.session_state.image_base64 = None
+
     @st.dialog("Setting Info.")
     def modal(self, type):
         st.subheader(f"Modal for {type}:")
@@ -52,9 +64,6 @@ class InputController:
             st.info("モーダルを閉じます...")
             time.sleep(1)
             st.rerun()
-
-    def _clear_states(self):
-        st.session_state.api_running = False
 
     def render_audio_input(self):
         st.markdown("Google API 使用。**外務インターネットへ接続します。**")
@@ -264,10 +273,12 @@ def main():
             #     user_input_state[f"user_input_{i}"] = st.session_state.get(
             #         f"user_input_{i}", ""
             #     )
-            if image_data is not None:
+            # if image_data is not None:
+            if True:
                 config_file_path = (
                     "assets/actions/112_chat_with_image_explation.yaml"
                 )
+                action_configs = chat_service.read_action_config(config_file_path)
                 user_input_state["num_inputs"] = 1
                 user_input_state["user_input_0"] = (
                     input_controller.get_image_base64()
@@ -295,8 +306,7 @@ def main():
             {"role": "assistant", "content": answer}
         )
         st.session_state.text_message = None
-        # st.session_state.image_base64 = None
-        # st.session_state.image_data = None
+        input_controller.clear_states()
         st.rerun()
 
     # page footer
