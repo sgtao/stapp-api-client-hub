@@ -25,7 +25,7 @@ from logic.ProcessImage import ProcessImage
 APP_TITLE = "Chatbot with Action Config"
 
 
-class InputController:
+class InputSupporter:
     def __init__(self) -> None:
         if "api_running" not in st.session_state:
             st.session_state.api_running = False
@@ -201,7 +201,7 @@ def main():
     """
     )
     # 1. セッション状態の初期化 [14-16]
-    input_controller = InputController()
+    input_supporter = InputSupporter()
     # chat_manager = ChatMessage()
     chat_service = ChatService()
     message = ChatMessage()
@@ -225,8 +225,8 @@ def main():
                 st.info("ここにチャットの要約を記します。")
 
     # 3. ユーザー入力の受付
-    input_controller.render_buttons()
-    image_data = input_controller.get_image_data()
+    input_supporter.render_buttons()
+    image_data = input_supporter.get_image_data()
     if image_data is not None:
         st.image(image_data)
 
@@ -281,7 +281,7 @@ def main():
                 action_configs = chat_service.read_action_config(config_file_path)
                 user_input_state["num_inputs"] = 1
                 user_input_state["user_input_0"] = (
-                    input_controller.get_image_base64()
+                    input_supporter.get_image_base64()
                 )
             else:
                 user_input_state["num_inputs"] = 0
@@ -306,7 +306,7 @@ def main():
             {"role": "assistant", "content": answer}
         )
         st.session_state.text_message = None
-        input_controller.clear_states()
+        input_supporter.clear_states()
         st.rerun()
 
     # page footer
