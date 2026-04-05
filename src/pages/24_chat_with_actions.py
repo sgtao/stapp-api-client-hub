@@ -3,6 +3,7 @@ import time
 import io
 
 # import os
+import urllib.parse
 
 import streamlit as st
 
@@ -48,13 +49,19 @@ class InputSupporter:
         st.session_state.image_data = None
         st.session_state.image_base64 = None
 
-    def get_input_state(self) -> dict:
+    def get_supporter_state(self) -> dict:
         """ChatBot処理で使う入力データをまとめて返す"""
-        has_image = st.session_state.image_base64 is not None
+        has_image = st.session_state.image_data is not None
+        image_base64 = st.session_state.image_base64
+
+        # URIエンコードされている場合はデコード
+        if image_base64 is not None:
+            image_base64 = urllib.parse.unquote(image_base64)
+
         return {
             "has_image": has_image,
             "image_data": st.session_state.image_data,
-            "image_base64": st.session_state.image_base64,
+            "image_base64": image_base64,
         }
 
     @st.dialog("Setting Info.")
@@ -135,33 +142,23 @@ class InputSupporter:
         if resized_image is not None:
             st.success("画像を縮小しました。")
             st.image(resized_image)
-            str_base64 = process_image.convert_to_base64(resized_image)
             # st.write(f"Base64(head 50 char.): {str_base64[:50]}...")
+            str_base64 = process_image.convert_to_base64(resized_image)
             st.code(str_base64)
 
         cols = st.columns(3)
         with cols[0]:
-            if process_image.get_resized_image() is not None:
+            if resized_image is not None:
                 if st.button("確定して閉じる", type="primary"):
-                    st.session_state.image_data = (
-                        process_image.get_resized_image()
-                    )
+                    st.session_state.image_data = resized_image
                     st.session_state.image_base64 = (
-                        process_image.convert_to_base64(
-                            process_image.get_resized_image()
-                        )
+                        process_image.convert_to_base64(resized_image)
                     )
                     st.rerun()
         with cols[1]:
             pass
         with cols[2]:
             self._modal_closer()
-
-    def get_image_data(self):
-        return st.session_state.image_data
-
-    def get_image_base64(self):
-        return st.session_state.image_base64
 
     def render_buttons(self):
         st.write("###### Input Options:")
@@ -235,9 +232,9 @@ def main():
 
     # 3. ユーザー入力の受付
     input_supporter.render_buttons()
-    image_data = input_supporter.get_image_data()
-    if image_data is not None:
-        st.image(image_data)
+    supporter_state = input_supporter.get_supporter_state()
+    if supporter_state.get("has_image", False):
+        st.image(supporter_state.get("image_data", None))
 
     prompt = st.text_area(
         label="User Message",
@@ -283,8 +280,8 @@ def main():
             #     user_input_state[f"user_input_{i}"] = st.session_state.get(
             #         f"user_input_{i}", ""
             #     )
-            input_state = input_supporter.get_input_state()
-            if input_state.get("has_image", False):
+            supporter_state = input_supporter.get_supporter_state()
+            if supporter_state.get("has_image", False):
                 config_file_path = (
                     "assets/actions/112_chat_with_image_explation.yaml"
                 )
@@ -292,9 +289,10 @@ def main():
                     config_file_path
                 )
                 user_input_state["num_inputs"] = 1
-                user_input_state["user_input_0"] = (
-                    input_supporter.get_image_base64()
+                user_input_state["user_input_0"] = supporter_state.get(
+                    "image_base64", ""
                 )
+                print(f"image_base64: {user_input_state.get("user_input_0")}")
             else:
                 user_input_state["num_inputs"] = 0
 

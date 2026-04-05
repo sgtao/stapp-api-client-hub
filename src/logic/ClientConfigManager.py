@@ -25,7 +25,8 @@ class ClientConfigManager:
         for i in range(num_inputs):
             key = f"user_input_{i}"
             if key in session_state:
-                value = urllib.parse.quote(str(session_state[key]))
+                # value = urllib.parse.quote(str(session_state[key]))
+                value = str(session_state[key])
                 replaced_str = replaced_str.replace(f"＜{key}＞", value)
 
         # replace target using results
