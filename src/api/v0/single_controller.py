@@ -23,7 +23,7 @@ async def single_controller(request: Request):
     api_logger.info_log(f"Receive {request.method}")
 
     try:
-        api_request = await create_api_request(request)
+        api_request = await create_api_request(request, use_messages=False)
         api_logger.info_log(f"API Client Request is {api_request}")
         # api_logger.info_log(f"API request URI: {api_request.url.path}")
         return await send_api_request(**api_request)

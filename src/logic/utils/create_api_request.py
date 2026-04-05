@@ -105,7 +105,7 @@ def make_session_state(config):
     return session_state
 
 
-async def create_api_request(request: Request):
+async def create_api_request(request: Request, use_messages=True):
     """
     リクエストからAPIリクエストの情報を抽出します。
     """
@@ -119,7 +119,7 @@ async def create_api_request(request: Request):
 
     try:
         # construct_request_from_body 内で例外が発生しても適切に上位へ伝える
-        return construct_request_from_body(body_data)
+        return construct_request_from_body(body_data, use_messages)
     except Exception as e:
         # 元の例外が HTTPException ならそのまま、それ以外なら 500 でラップ
         if isinstance(e, HTTPException):
@@ -128,7 +128,7 @@ async def create_api_request(request: Request):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-def construct_request_from_body(body_data):
+def construct_request_from_body(body_data, use_messages=True):
     # --- 1. 設定の読み込みとセッション構築 ---
     config_file_path = body_data.get("config_file")
     if not config_file_path:
@@ -166,8 +166,11 @@ def construct_request_from_body(body_data):
 
     # メッセージの結合（元のリストを汚染しない手法）
     current_messages = list(base_req_body.get("messages", []))  # コピーを作成
-    input_messages = body_data.get("messages", [])
-    combined_messages = current_messages + input_messages
+    if use_messages:
+        input_messages = body_data.get("messages", [])
+        combined_messages = current_messages + input_messages
+    else:
+        combined_messages = current_messages
 
     # ボディの作成（shallow copy）
     req_body = {**base_req_body, "messages": combined_messages}

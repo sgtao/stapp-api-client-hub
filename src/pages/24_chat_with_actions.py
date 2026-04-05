@@ -48,6 +48,15 @@ class InputSupporter:
         st.session_state.image_data = None
         st.session_state.image_base64 = None
 
+    def get_input_state(self) -> dict:
+        """ChatBot処理で使う入力データをまとめて返す"""
+        has_image = st.session_state.image_base64 is not None
+        return {
+            "has_image": has_image,
+            "image_data": st.session_state.image_data,
+            "image_base64": st.session_state.image_base64,
+        }
+
     @st.dialog("Setting Info.")
     def modal(self, type):
         st.subheader(f"Modal for {type}:")
@@ -253,6 +262,7 @@ def main():
         st.session_state.messages.append(user_message)
 
         # 4. アクションAPIの実行 (YAMLの指示に従って連鎖実行) [2, 19]
+        input_supporter.set_api_running()
         with st.spinner("思考中..."):
             messages = []
             assistant_content = st.session_state.summary_chat
@@ -273,12 +283,14 @@ def main():
             #     user_input_state[f"user_input_{i}"] = st.session_state.get(
             #         f"user_input_{i}", ""
             #     )
-            # if image_data is not None:
-            if True:
+            input_state = input_supporter.get_input_state()
+            if input_state.get("has_image", False):
                 config_file_path = (
                     "assets/actions/112_chat_with_image_explation.yaml"
                 )
-                action_configs = chat_service.read_action_config(config_file_path)
+                action_configs = chat_service.read_action_config(
+                    config_file_path
+                )
                 user_input_state["num_inputs"] = 1
                 user_input_state["user_input_0"] = (
                     input_supporter.get_image_base64()
