@@ -17,7 +17,7 @@ action_config:
   config_file: assets/single/102_summarize_messages.yaml
   method: POST
   num_inputs: 1
-  uri: http://localhost:3000/api/v0/single
+  uri: http://localhost:3000/api/v0/messages
   use_dynamic_inputs: true
   user_input_0: "openai/gpt-oss-20b"
   user_property_path: results
