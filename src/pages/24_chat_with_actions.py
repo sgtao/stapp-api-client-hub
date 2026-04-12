@@ -135,7 +135,8 @@ class InputSupporter:
             paste_result.image_data.save(img_byte_arr, format="PNG")
             process_image.set_image_data(img_byte_arr.getvalue())
             # process_image.resize_image(target_height=240)
-            process_image.resize_image(target_height=160)
+            # process_image.resize_image(target_height=160)
+            process_image.resize_image()
 
         # session_stateから表示（再描画時にも対応）
         resized_image = process_image.get_resized_image()

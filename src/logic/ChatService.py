@@ -170,6 +170,7 @@ class ChatService:
         for index, cfg in enumerate(action_configs):
             # print(cfg)
             _type = cfg.get("type", "request")
+            self.app_logger.info_log(f"action type {index}: {_type}")
 
             if _type == "request":
                 try:
