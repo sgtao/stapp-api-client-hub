@@ -1,4 +1,4 @@
-title: 102_chat_with_response_summary.yaml
+title: chat_with_response_summary.yaml
 note: |
   - チャット回答を含めて履歴を要約する
 action_config:

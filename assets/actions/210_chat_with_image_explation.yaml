@@ -1,4 +1,4 @@
-title: 112_chat_with_image_explation.yaml
+title: chat_with_image_explation.yaml
 note: |
   - 画像情報を使ってチャット回答を含めて履歴を要約する
 action_config:

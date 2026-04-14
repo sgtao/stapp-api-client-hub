@@ -185,6 +185,10 @@ class InputSupporter:
                 pass
 
 
+CONFIG_WO_IMAGE = "assets/actions/200_chat_with_response_summary.yaml"
+CONFIG_WITH_IMAGE = "assets/actions/210_chat_with_image_explation.yaml"
+
+
 def initial_session_state():
     # セッション状態の初期化
     if "results" not in st.session_state:
@@ -213,7 +217,7 @@ def main():
     chat_service = ChatService()
     message = ChatMessage()
     # Setup to access API-Server
-    config_file_path = "assets/actions/102_chat_with_response_summary.yaml"
+    config_file_path = CONFIG_WO_IMAGE
     action_configs = chat_service.read_action_config(config_file_path)
 
     # Chat with Config
@@ -283,9 +287,7 @@ def main():
             #     )
             supporter_state = input_supporter.get_supporter_state()
             if supporter_state.get("has_image", False):
-                config_file_path = (
-                    "assets/actions/112_chat_with_image_explation.yaml"
-                )
+                config_file_path = CONFIG_WITH_IMAGE
                 action_configs = chat_service.read_action_config(
                     config_file_path
                 )
