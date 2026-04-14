@@ -77,16 +77,15 @@ def merge_package() -> None:
             print(f"[SKIP] Not found: {src_dir}")
             continue
         print(f"# {target}")
-        tar_proc = subprocess.run(
-            ["tar", "cf", "-", "."],
-            cwd=src_dir,
-            stdout=subprocess.PIPE,
-        )
-        subprocess.run(
-            ["tar", "xf", "-"],
-            cwd=PACKAGE_DIR,
-            input=tar_proc.stdout,
-        )
+        # tar の代わりに shutil でコピー（クロスプラットフォーム対応）
+        for item in os.listdir(src_dir):
+            src = os.path.join(src_dir, item)
+            dst = os.path.join(PACKAGE_DIR, item)
+            if os.path.isdir(src):
+                shutil.copytree(src, dst, dirs_exist_ok=True)
+            else:
+                shutil.copy2(src, dst)
+            print(f"  {item}")
 
     # assets を package/ にコピー
     if os.path.exists(ASSET_DIR):
