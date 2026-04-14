@@ -54,7 +54,8 @@ class ProcessManager:
                 config_mode,
             ]
             if use_package:
-                package_prog = "dist/api_server/api_server"
+                # package_prog = "dist/api_server/api_server"
+                package_prog = "./api_server"
                 command = [
                     package_prog,
                     "--port",

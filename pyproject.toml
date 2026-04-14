@@ -65,4 +65,6 @@ build_stapp = { cmd = "pyinstaller run_stapp.spec --clean", help = "build stapp 
 build_server = { cmd = "pyinstaller api_server.spec --clean", help = "build api_server dist. package" }
 build = { cmd = "task build_server && task build_stapp", help = "build distribution package" }
 copy-to-dist = { cmd = "cp -r src .streamlit hooks dist/run_stapp/.", help = "copy additional files to dist" }
-make-dist = { cmd = "task rm-dist && task build && task copy-to-dist", help = "make distribution package" }
+make-package = { cmd = "python -c \"import shutil, os; [shutil.copytree(os.path.join('dist', d), 'dist/package', dirs_exist_ok=True) for d in ['api_server', 'run_stapp']]; shutil.copytree('assets', 'dist/package/assets', dirs_exist_ok=True)\"", help = "merge dist packages into dist/package" }
+# make-dist = { cmd = "task rm-dist && task build && task copy-to-dist", help = "make distribution package" }
+make-dist    = { cmd = "task rm-dist && task build && task copy-to-dist && task make-package", help = "make distribution package" }
