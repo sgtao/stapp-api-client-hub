@@ -60,11 +60,8 @@ docker-build = { cmd = "docker build -t my-stapp .", help = "build Docker image"
 docker-run = { cmd = "docker run -p 8051:8051 my-stapp", help = "run Docker container" }
 
 # make distribution package
-rm-dist = { cmd = "rm -rf build dist", help = "remove build and dist directory" }
-build_stapp = { cmd = "pyinstaller run_stapp.spec --clean", help = "build stapp dist. package" }
-build_server = { cmd = "pyinstaller api_server.spec --clean", help = "build api_server dist. package" }
-build = { cmd = "task build_server && task build_stapp", help = "build distribution package" }
-copy-to-dist = { cmd = "cp -r src .streamlit hooks dist/run_stapp/.", help = "copy additional files to dist" }
-make-package = { cmd = "python -c \"import shutil, os; [shutil.copytree(os.path.join('dist', d), 'dist/package', dirs_exist_ok=True) for d in ['api_server', 'run_stapp']]; shutil.copytree('assets', 'dist/package/assets', dirs_exist_ok=True)\"", help = "merge dist packages into dist/package" }
-# make-dist = { cmd = "task rm-dist && task build && task copy-to-dist", help = "make distribution package" }
-make-dist    = { cmd = "task rm-dist && task build && task copy-to-dist && task make-package", help = "make distribution package" }
+dist-clean    = { cmd = "python scripts/make_package.py rm-dist",      help = "clean build & dist" }
+dist-build    = { cmd = "python scripts/make_package.py build",        help = "pyinstaller build only" }
+dist-copy     = { cmd = "python scripts/make_package.py copy-to-dist", help = "copy additional files to dist" }
+dist-package  = { cmd = "python scripts/make_package.py merge-package", help = "merge into dist/package" }
+make-dist = { cmd = "python scripts/make_package.py", help = "make distribution package" }
