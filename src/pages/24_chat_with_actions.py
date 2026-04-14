@@ -268,15 +268,15 @@ def main():
         with st.spinner("思考中..."):
             messages = []
             assistant_content = st.session_state.summary_chat
-            if len(messages) > 0:
-                assistant_content += messages[-1].content
+            # if len(messages) > 0:
+            #     assistant_content += messages[-1].content
             if assistant_content != "":
                 messages.append(
                     {"role": "assistant", "content": assistant_content}
                 )
 
             messages.append(user_message)
-            st.session_state.text_message = None
+            # st.session_state.text_message = None
 
             user_input_state = {}
             # num_user_inputs = st.session_state.get("num_user_inputs", 0)
@@ -295,7 +295,7 @@ def main():
                 user_input_state["user_input_0"] = supporter_state.get(
                     "image_base64", ""
                 )
-                print(f"image_base64: {user_input_state.get("user_input_0")}")
+                # print(f"image_base64: {user_input_state.get("user_input_0")}")
             else:
                 user_input_state["num_inputs"] = 0
 
@@ -318,7 +318,7 @@ def main():
         st.session_state.messages.append(
             {"role": "assistant", "content": answer}
         )
-        st.session_state.text_message = None
+        st.session_state.text_message = ""
         input_supporter.clear_states()
         st.rerun()
 

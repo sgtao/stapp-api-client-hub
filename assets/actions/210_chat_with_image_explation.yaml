@@ -3,7 +3,7 @@ note: |
   - 画像情報を使ってチャット回答を含めて履歴を要約する
 action_config:
 - type: request
-  config_file: assets/single/112_explain_image.yaml
+  config_file: assets/single/211_explain_image.yaml
   method: POST
   num_inputs: 1
   uri: http://localhost:3000/api/v0/single
@@ -11,7 +11,7 @@ action_config:
   user_input_0: "＜user_input_0＞"
   user_property_path: results
 - type: request
-  config_file: assets/single/003_submit_message_with_suppliment.yaml
+  config_file: assets/single/201_submit_message_with_suppliment.yaml
   method: POST
   num_inputs: 2
   uri: http://localhost:3000/api/v0/messages
@@ -23,7 +23,7 @@ action_config:
   role: "assistant"
   content: "＜action_result_1＞"
 - type: request
-  config_file: assets/single/102_summarize_messages.yaml
+  config_file: assets/single/202_summarize_messages.yaml
   method: POST
   num_inputs: 1
   uri: http://localhost:3000/api/v0/messages

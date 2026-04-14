@@ -1,10 +1,8 @@
-# 102_summarize_messages.yaml
+# summarize_messages.yaml
 title: Summarize messages
 note: |
   - summarize messages into text under 4k char. using 'user_input' model
   - `user_input_0`:
-    - `gemma2-9b-it`
-    - `llama-3.1-8b-instant`
     - `meta-llama/llama-4-scout-17b-16e-instruct`
     - `openai/gpt-oss-20b`
     - `openai/gpt-oss-120b`
@@ -16,9 +14,8 @@ single_config:
     Value: Bearer ＜API_KEY＞
   method: POST
   req_body:
-    # model: "llama-3.3-70b-versatile"
-    # model: "meta-llama/llama-4-scout-17b-16e-instruct"
     model: "＜user_input_0＞"
+    # max_completion_tokens: 5000
     messages:
       - role: "system"
         content: "userおよびassistantのメッセージを4,000以内に要約して下さい。

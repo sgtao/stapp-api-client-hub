@@ -1,0 +1,31 @@
+# submit_message_with_suppliment.yaml
+title: submit user message with supplement prompt
+note: |
+  - submit user message to `user_input_0` model
+  - suppelment sysetm prompt of `user_input_1` model
+  - `user_input_0`:
+    - `openai/gpt-oss-20b`
+    - `openai/gpt-oss-120b`
+  - `user_input_1`: supplement prompt(text)
+session_state:
+  header_df:
+  - Property: Content-Type
+    Value: application/json
+  - Property: Authorization
+    Value: Bearer ＜API_KEY＞
+  method: POST
+  req_body:
+    model: "＜user_input_0＞"
+    # max_completion_tokens: 2500
+    messages:
+      - role: "system"
+        content: |
+          あなたは聡明なAIです。ユーザの入力に全て日本語で返答を生成してください。
+          - ユーザの返答には補足情報を使用してください
+          - 回答は2,000文字以内でまとめるように努めてください
+          ---
+          ## 補足情報
+          ＜user_input_1＞
+  uri: https://api.groq.com/openai/v1/chat/completions
+  use_dynamic_inputs: true
+  user_property_path: choices[0].message.content
