@@ -11,6 +11,7 @@ streamlit_hidden_imports = collect_submodules("streamlit")
 fastapi_data = collect_data_files("fastapi")
 uvicorn_data = collect_data_files("uvicorn")
 streamlit_data = collect_data_files("streamlit")
+paste_button_data = collect_data_files("streamlit_paste_button")
 
 # Analysis: アプリケーションの依存関係を分析
 a = Analysis(
@@ -27,7 +28,8 @@ a = Analysis(
     ]
     + fastapi_data
     + uvicorn_data
-    + streamlit_data,
+    + streamlit_data
+    + paste_button_data,
     hiddenimports=[
         # 明示的にインポートが必要なモジュール
         "fastapi",
@@ -45,6 +47,10 @@ a = Analysis(
         "json",
         "re",
         "argparse",
+        "speech_recognition",
+        "streamlit_paste_button",
+        "bs4",
+        "toon",
     ]
     + fastapi_hidden_imports
     + uvicorn_hidden_imports

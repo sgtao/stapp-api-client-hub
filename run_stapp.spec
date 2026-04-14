@@ -9,6 +9,7 @@ Streamlit関連の依存関係を自動収集:
 """
 streamlit_hidden_imports = collect_submodules("streamlit")
 streamlit_data = collect_data_files("streamlit")
+paste_button_data = collect_data_files("streamlit_paste_button")
 
 # Analysis: アプリケーションの依存関係を分析し、必要なファイルを特定
 a = Analysis(
@@ -23,25 +24,27 @@ a = Analysis(
         ("assets", "assets"),       # 追加: YAML設定ファイル用
         (".streamlit", ".streamlit"), # 追加: Streamlitの設定用
     ]
-    + streamlit_data,  # Streamlitのデータファイルを追加
+    + streamlit_data  # Streamlitのデータファイルを追加
+    + paste_button_data,
     hiddenimports=[ # 明示的にインポートが必要なモジュールを指定
         "streamlit",
         "streamlit.web.cli",
         "src.ui.spiral_chart",
         "src.logic.calculations",
         # 以下は、Streamlitの依存パッケージ
-        "pyyaml",
+        # "pyyaml",
+        "yaml",
         "fastapi",
         "uvicorn",
         "requests",
         "jmespath",
         "httpx",
         "bs4",
-        "duckduckgo-search",
+        "duckduckgo_search",
         "pandas",
         "numpy",
         "plotly",
-        "pillow",
+        "PIL",
         "packaging",
         "importlib_metadata",
         "validators",
@@ -50,8 +53,10 @@ a = Analysis(
         "click",
         "rich",
         "protobuf",
+        # "python-toon",
         "toon",
-        "python-toon",
+        "speech_recognition",
+        "streamlit_paste_button",
     ]
     + streamlit_hidden_imports, # Streamlitの全サブモジュールを追加
     hookspath=["./hooks"],  # カスタムフックスクリプトのパス
