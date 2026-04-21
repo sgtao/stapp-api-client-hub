@@ -159,8 +159,9 @@ class ChatService:
         Exception
             各アクションの実行中に発生した例外（ログ出力と警告UIを伴う）。
         """
-        self.app_logger.info_log(f"post message: {messages}")
-        self.app_logger.info_log(f"with config: {action_configs}")
+        self.app_logger.info_log(f"post message : {messages}")
+        self.app_logger.info_log(f"session state: {session_state}")
+        self.app_logger.info_log(f"with config  : {action_configs}")
 
         l_copied = messages.copy()
         copied_messages = copy.deepcopy(l_copied)

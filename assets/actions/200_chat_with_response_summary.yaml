@@ -5,7 +5,7 @@ action_config:
 - type: request
   config_file: assets/single/201_submit_message_with_suppliment.yaml
   method: POST
-  num_inputs: 1
+  num_inputs: 2
   uri: http://localhost:3000/api/v0/messages
   use_dynamic_inputs: true
   user_input_0: "openai/gpt-oss-120b"

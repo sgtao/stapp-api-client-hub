@@ -1,14 +1,10 @@
 import time
-
 import io
-
 # import os
 import urllib.parse
 
 import streamlit as st
-
 # import streamlit.components.v1 as stc
-
 from streamlit_paste_button import paste_image_button as pbutton
 
 from ui.ChatMessage import ChatMessage
@@ -193,8 +189,10 @@ def initial_session_state():
     # セッション状態の初期化
     if "results" not in st.session_state:
         st.session_state.results = []
+    if "system_prompt" not in st.session_state:
+        st.session_state.system_prompt = ""
     if "text_message" not in st.session_state:
-        st.session_state.text_message = None
+        st.session_state.text_message = ""
     if "summary_chat" not in st.session_state:
         st.session_state.summary_chat = ""
 
@@ -235,6 +233,17 @@ def main():
             else:
                 st.info("ここにチャットの要約を記します。")
 
+    # 2. システムプロンプトの入力
+    system_prompt = ""
+    with st.expander("System Prompt:"):
+        system_prompt = st.text_area(
+            label="System Prompt (Max. 8,000 chars.)",
+            placeholder="Input System Prompt (Optional)",
+            value=st.session_state.system_prompt,
+            height="content",
+            max_chars=8000,
+        )
+
     # 3. ユーザー入力の受付
     input_supporter.render_buttons()
     supporter_state = input_supporter.get_supporter_state()
@@ -242,12 +251,13 @@ def main():
         st.image(supporter_state.get("image_data", None))
 
     prompt = st.text_area(
-        label="User Message",
+        label="User Message (Max. 4,000 chars.)",
         placeholder="Please input message , and press `submit`",
         value=st.session_state.text_message,
+        max_chars=4000,
     )
-    if prompt is not None:
-        st.session_state.text_message = prompt
+    # if prompt is not None:
+    #     st.session_state.text_message = prompt
 
     # if prompt and prompt.text:
     if st.button("submit", icon="🏃"):
@@ -291,13 +301,14 @@ def main():
                 action_configs = chat_service.read_action_config(
                     config_file_path
                 )
-                user_input_state["num_inputs"] = 1
-                user_input_state["user_input_0"] = supporter_state.get(
+                user_input_state["num_inputs"] = 2
+                user_input_state["user_input_0"] = system_prompt
+                user_input_state["user_input_1"] = supporter_state.get(
                     "image_base64", ""
                 )
-                # print(f"image_base64: {user_input_state.get("user_input_0")}")
             else:
-                user_input_state["num_inputs"] = 0
+                user_input_state["num_inputs"] = 1
+                user_input_state["user_input_0"] = system_prompt
 
             # user_inputs にユーザーの入力を渡す
             results = chat_service.post_messages_with_configs(
@@ -318,6 +329,7 @@ def main():
         st.session_state.messages.append(
             {"role": "assistant", "content": answer}
         )
+        st.session_state.system_prompt = system_prompt
         st.session_state.text_message = ""
         input_supporter.clear_states()
         st.rerun()

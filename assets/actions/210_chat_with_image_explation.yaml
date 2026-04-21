@@ -8,7 +8,7 @@ action_config:
   num_inputs: 1
   uri: http://localhost:3000/api/v0/single
   use_dynamic_inputs: true
-  user_input_0: "＜user_input_0＞"
+  user_input_0: "＜user_input_1＞"
   user_property_path: results
 - type: request
   config_file: assets/single/201_submit_message_with_suppliment.yaml
@@ -17,11 +17,15 @@ action_config:
   uri: http://localhost:3000/api/v0/messages
   use_dynamic_inputs: true
   user_input_0: "openai/gpt-oss-120b"
-  user_input_1: "＜action_result_0＞"
+  user_input_1: |
+    ＜user_input_1＞
+    ---
+    ##画像情報
+    ＜action_result_0＞
   user_property_path: results
 - type: append_message
   role: "assistant"
-  content: "＜action_result_1＞"
+  content: "＜action_result_0＞"
 - type: request
   config_file: assets/single/202_summarize_messages.yaml
   method: POST

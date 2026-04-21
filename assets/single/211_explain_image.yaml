@@ -30,7 +30,10 @@ single_config:
       - role: "user"
         content:
           - type: "text"
-            text: "添付画像を解説してください"
+            text: |
+              添付画像を解説してください。
+              ## 補足
+              ＜user_input_1＞
           - type: "image_url"
             image_url:
               detail: "auto"
