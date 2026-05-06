@@ -6,7 +6,7 @@ import yaml
 
 import streamlit as st
 
-METHODS = ["GET", "POST", "PUT", "DELETE"]
+METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE"]
 
 
 class ApiRequestInputs:
