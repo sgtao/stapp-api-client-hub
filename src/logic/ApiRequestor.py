@@ -1,4 +1,6 @@
 # ApiRequestor.py
+import time
+
 import requests
 import urllib.parse
 
@@ -13,69 +15,84 @@ class ApiRequestor:
         # self.logger = logging.getLogger(__name__)
         self.api_logger = AppLogger(__name__)
 
-    def send_request(self, url, method, headers=None, body=None):
+    def send_request(self, url, method, headers=None, body=None, timeout=30):
         """
         汎用的なAPIリクエストメソッド
+        APIリクエストを送信し、429エラー時にリトライを行う。
         :param url: APIエンドポイント
         :param method: HTTPメソッド (GET, POST, PUT, DELETE)
         :param headers: リクエストヘッダー (辞書形式)
         :param body: リクエストボディ (辞書形式)
+        :param timeout: リクエストタイムアウト (ディフォルト 30秒)
         :return: レスポンスオブジェクトまたはエラーメッセージ
         """
-        try:
-            # メソッド開始時のログ
-            self.api_logger.api_start_log(url, method, headers, body)
+        max_retries = 3
+        retry_wait = 30  # 秒
 
-            # メソッドごとの処理
-            if method in ["GET", "DELETE"]:
+        # メソッド開始時のログ
+        self.api_logger.api_start_log(url, method, headers, body)
+        for attempt in range(max_retries + 1):
+            try:
+
+                # 一般的にリクエストボディを持つのは POST, PUT, PATCH です
+                has_body = method in ["POST", "PUT", "PATCH"]
+                # 全メソッド共通で1つのリクエスト文に集約可能
                 response = self.session.request(
                     method=method,
                     url=url,
                     headers=headers,
+                    json=body if has_body else None,
+                    timeout=timeout,  # 引数で受け取った値を使用
                 )
-            elif method in ["POST", "PUT"]:
-                response = self.session.request(
-                    method=method,
-                    url=url,
-                    headers=headers,
-                    json=body,
-                )
-            else:
-                raise ValueError(f"Unsupported HTTP method: {method}")
 
-            # ステータスコードチェック
-            response.raise_for_status()
+                # ステータスコードが 429 の場合の処理
+                if response.status_code == 429:
+                    if attempt < max_retries:
+                        self.api_logger.info_log(
+                            f"Status 429. Retrying in {retry_wait}s... "
+                            f"(Attempt {attempt + 1}/{max_retries})"
+                        )
+                        time.sleep(retry_wait)
+                        continue
+                    else:
+                        self.api_logger.error_log(
+                            "Max retries reached for status 429."
+                        )
 
-            # メソッド終了時のログ
-            self.api_logger.api_success_log(response)
+                # 429以外、またはリトライ上限に達した場合はレスポンスを返す
+                # ステータスコードチェック
+                response.raise_for_status()
+                # メソッド終了時のログ
+                self.api_logger.api_success_log(response)
+                # レスポンス解析
+                return response
 
-            # レスポンス解析
-            return response
+            except requests.exceptions.HTTPError as http_err:
+                # HTTPエラー時のログ
+                self.api_logger.error_log(f"HTTP error occurred: {http_err}")
 
-        except requests.exceptions.HTTPError as http_err:
-            # HTTPエラー時のログ
-            self.api_logger.error_log(f"HTTP error occurred: {http_err}")
+                # HTTPエラー時の処理
+                err_msg = ""
+                err_msg += f"HTTPエラー: {http_err}\n"
+                if hasattr(http_err.response, "status_code"):
+                    err_msg += (
+                        f"ステータスコード: {http_err.response.status_code}\n"
+                    )
+                    err_msg += f"理由: {http_err.response.reason}\n"
+                    err_msg += f"詳細: {http_err.response.json()}"
 
-            # HTTPエラー時の処理
-            err_msg = ""
-            err_msg += f"HTTPエラー: {http_err}\n"
-            if hasattr(http_err.response, "status_code"):
-                err_msg += (
-                    f"ステータスコード: {http_err.response.status_code}\n"
-                )
-                err_msg += f"理由: {http_err.response.reason}\n"
-                err_msg += f"詳細: {http_err.response.json()}"
-            raise err_msg
+                # 文字列ではなく、Exceptionとして投げる（または元のhttp_errを再送出する）
+                raise Exception(err_msg) from http_err
 
-        except requests.exceptions.RequestException as req_err:
-            # その他のリクエストエラー時のログ
-            self.api_logger.error_log(f"Request error occurred: {req_err}")
-            raise
+            except requests.exceptions.RequestException as req_err:
+                # その他のリクエストエラー時のログ
+                self.api_logger.error_log(f"Request error occurred: {req_err}")
+                raise
 
-        except Exception as e:
-            # その他例外発生時のログ
-            self.api_logger.error_log(f"An unexpected error occurred: {e}")
-            raise
+            except Exception as e:
+                # その他例外発生時のログ
+                self.api_logger.error_log(f"An unexpected error occurred: {e}")
+                raise
 
     def send_api_request(
         self,
