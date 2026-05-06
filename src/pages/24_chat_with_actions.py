@@ -219,6 +219,8 @@ def main():
     # Setup to access API-Server
     config_file_path = CONFIG_WO_IMAGE
     action_configs = chat_service.read_action_config(config_file_path)
+    system_prompt = ""
+    prompt = ""
 
     # Chat with Config
     with st.container(height="stretch"):
@@ -236,8 +238,7 @@ def main():
                 st.info("ここにチャットの要約を記します。")
 
     # 2. システムプロンプトの入力
-    system_prompt = ""
-    with st.expander("System Prompt:"):
+    with st.expander("System Prompt:", expanded=False):
         system_prompt = st.text_area(
             label="System Prompt (Max. 8,000 chars.)",
             placeholder="Input System Prompt (Optional)",
@@ -252,17 +253,18 @@ def main():
     if supporter_state.get("has_image", False):
         st.image(supporter_state.get("image_data", None))
 
-    prompt = st.text_area(
-        label="User Message (Max. 4,000 chars.)",
-        placeholder="Please input message , and press `submit`",
-        value=st.session_state.text_message,
-        max_chars=4000,
-    )
-    # if prompt is not None:
-    #     st.session_state.text_message = prompt
+    with st.form(key="prompt_form", clear_on_submit=True):
+        prompt = st.text_area(
+            label="User Message (Max. 4,000 chars.)",
+            placeholder="Please input message , and press `submit`",
+            value=st.session_state.text_message,
+            max_chars=4000,
+        )
 
-    # if prompt and prompt.text:
-    if st.button("submit", icon="🏃"):
+        # if st.button("submit", icon="🏃"):
+        submit_button = st.form_submit_button(label="submit", icon="🏃")
+
+    if submit_button:
         if prompt == "":
             st.warning("Please input message, before submit")
             time.sleep(3)
@@ -349,7 +351,11 @@ def main():
             )
 
     with cols[1]:
-        pass
+        if st.button(
+            help="Clear Session States",
+            label="🛀",
+        ):
+            ChatModal().modal(type="clear_session")
     with cols[2]:
         pass
     with cols[3]:

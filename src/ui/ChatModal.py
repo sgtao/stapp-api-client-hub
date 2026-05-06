@@ -6,7 +6,7 @@ import streamlit as st
 
 class ChatModal:
     @st.dialog("Chat Modal.", width="large")
-    def modal(self, type, messages):
+    def modal(self, type, messages=[]):
         st.write(f"Modal for {type}:")
         if type == "copy_response":
             if len(messages) > 0:
@@ -15,6 +15,8 @@ class ChatModal:
             else:
                 st.warning("Message not found!")
             self._modal_closer()
+        elif type == "clear_session":
+            self.confirm_clear_session()
         else:
             st.write("No Definition.")
 
@@ -51,3 +53,19 @@ class ChatModal:
             with st.expander(label=_label, expanded=False):
                 with st.container(horizontal_alignment="right"):
                     st.code(message.get("content", ""))
+
+    # 『Clear』モーダル：
+    def confirm_clear_session(self):
+        st.subheader("Clear Session?")
+        st.code(
+            "チャットを初期化します（systemprompt含め削除）。よろしいですか？"
+        )
+        col_l, col_r = st.columns(2)
+        with col_l:
+            self._modal_closer()
+        with col_r:
+            if st.button("Clear", type="primary"):
+                # 全てのセッション状態をクリアする
+                st.session_state.clear()
+                time.sleep(1)
+                st.rerun()
