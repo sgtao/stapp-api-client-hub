@@ -6,6 +6,9 @@ import time
 import subprocess
 import signal
 
+from logic.AppLogger import AppLogger
+
+APP_TITLE = "ProcessManager"
 SUBPROCESS_PROG = "src/api_server.py"
 
 
@@ -20,6 +23,7 @@ class ProcessInfo:
 
 class ProcessManager:
     def __init__(self):
+        self.app_logger = AppLogger(APP_TITLE)
         self.servers: dict[str, ProcessInfo] = {}
         self.num_server = 0
 
@@ -64,6 +68,7 @@ class ProcessManager:
                     config_mode,
                 ]
 
+            self.app_logger.info_log(f"Process start: {command}")
             process = self.launch_local(command)
 
             self.servers[server_id] = ProcessInfo(
@@ -71,12 +76,15 @@ class ProcessManager:
             )
             # st.session_state.servers = self.servers
             # st.success(f"API Server started on port {port}")
+            self.app_logger.info_log(f"API Server started on port {port}")
             return True
         except Exception as e:
             # st.error(f"API Server failed to start: {e}")
+            self.app_logger.error_log(f"API Server failed to start: {e}")
             raise f"API Server failed to start: {e}"
 
     def stop_server(self, server_id: str):
+        self.app_logger.info_log(f"Process stop: {server_id}")
         info = self.servers.get(server_id)
         if not info:
             raise ValueError(f"Server '{server_id}' has no info")
