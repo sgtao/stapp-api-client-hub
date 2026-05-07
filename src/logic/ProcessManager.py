@@ -1,5 +1,6 @@
 # ProcessManager.py
 import os
+import platform
 import time
 
 # import streamlit as st
@@ -10,6 +11,8 @@ from logic.AppLogger import AppLogger
 
 APP_TITLE = "ProcessManager"
 SUBPROCESS_PROG = "src/api_server.py"
+LINUX_PACKAGE = "./api_server"
+WIN_PACKAGE = "api_server.exe"
 
 
 class ProcessInfo:
@@ -29,7 +32,11 @@ class ProcessManager:
 
     # def start_server(self, server_id: str, port: int, use_package=False):
     def start_server(
-        self, port: int, use_package=False, config_mode="default"
+        self,
+        port: int,
+        use_package=False,
+        config_mode="default",
+        api_key="",
     ):
         """
         FastAPIサーバーをバックグラウンドで起動します。
@@ -45,6 +52,8 @@ class ProcessManager:
 
         # --- server_id 自動採番 ---
         server_id = f"sid{self.num_server:04d}"
+        is_windows = platform.system() == "Windows"
+        prog_name = WIN_PACKAGE if is_windows else LINUX_PACKAGE
 
         try:
             # APIサーバーを起動し、プロセスをセッション状態に保存
@@ -58,10 +67,8 @@ class ProcessManager:
                 config_mode,
             ]
             if use_package:
-                # package_prog = "dist/api_server/api_server"
-                package_prog = "./api_server"
                 command = [
-                    package_prog,
+                    prog_name,
                     "--port",
                     str(port),
                     "--config",
@@ -69,7 +76,7 @@ class ProcessManager:
                 ]
 
             self.app_logger.info_log(f"Process start: {command}")
-            process = self.launch_local(command)
+            process = self.launch_local(command, api_key)
 
             self.servers[server_id] = ProcessInfo(
                 server_id, process, port, config_mode
@@ -116,19 +123,27 @@ class ProcessManager:
     def list_servers(self):
         return {sid: self.get_status(sid) for sid in self.servers.keys()}
 
-    def launch_local(self, command) -> int:
-        env = os.environ.copy()
-        env["API_KEY"] = os.getenv("API_KEY")
+    def launch_local(self, command, api_key="") -> int:
+        try:
+            env = os.environ.copy()
+            if api_key != "":
+                env["API_KEY"] = api_key
+            elif os.getenv("API_KEY", "") != "":
+                env["API_KEY"] = os.getenv("API_KEY", "")
 
-        process = subprocess.Popen(
-            command,
-            env=env,
-            # stdout=subprocess.PIPE,
-            # stderr=subprocess.PIPE,
-            start_new_session=True,
-        )
-        # print(f"start local (pid: {process})")
-        return process
+            process = subprocess.Popen(
+                command,
+                env=env,
+                # stdout=subprocess.PIPE,
+                # stderr=subprocess.PIPE,
+                start_new_session=True,
+            )
+            # print(f"start local (pid: {process})")
+            return process
+        except Exception as e:
+            # st.error(f"API Server failed to start: {e}")
+            self.app_logger.error_log(f"launch_local fail: {e}")
+            raise f"launch_local fail: {e}"
 
     def stop_local(self, pid):
         """

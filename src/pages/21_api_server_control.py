@@ -41,6 +41,8 @@ def initial_session_state():
         st.session_state.selected_config = ""
     if "servers" not in st.session_state:
         st.session_state.servers = {}
+    if "api_key" not in st.session_state:
+        st.session_state.api_key = ""
 
 
 def test_api_hello(port):
@@ -258,7 +260,8 @@ def main():
         if st.button("Rerun (`R`)", icon="🔃"):
             st.rerun()
     with cols[1]:
-        _use_package = st.toggle("Use packaged api-server", value=False)
+        # _use_package = st.toggle("Use packaged api-server", value=False)
+        _use_package = st.toggle("Use packaged api-server", value=True)
     with cols[2]:
         if st.button(
             label=f"Run api-server({port})",
@@ -268,7 +271,10 @@ def main():
         ):
             # start_api_server(port, _use_package)
             pm.start_server(
-                port=port, use_package=_use_package, config_mode=config_mode
+                port=port,
+                use_package=_use_package,
+                config_mode=config_mode,
+                api_key=st.session_state.api_key,
             )
             st.session_state.servers = pm.get_servers()
             st.rerun()
