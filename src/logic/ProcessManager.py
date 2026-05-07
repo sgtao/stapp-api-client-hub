@@ -1,10 +1,12 @@
 # ProcessManager.py
 import os
-import time
+import platform
 
-# import streamlit as st
-import subprocess
+# from pathlib import Path
 import signal
+import subprocess
+import sys
+import time
 
 SUBPROCESS_PROG = "src/api_server.py"
 
@@ -23,15 +25,12 @@ class ProcessManager:
         self.servers: dict[str, ProcessInfo] = {}
         self.num_server = 0
 
-    # def start_server(self, server_id: str, port: int, use_package=False):
     def start_server(
         self, port: int, use_package=False, config_mode="default"
     ):
         """
-        FastAPIサーバーをバックグラウンドで起動します。
+        FastAPIサーバーをバックグラウンドで起動します。（Windows対応版）
         """
-        # if server_id in self.servers:
-        #     raise ValueError(f"Server '{server_id}' already exists")
         # --- port 重複チェック ---
         self.num_server = 0
         for info in self.servers.values():
@@ -42,20 +41,19 @@ class ProcessManager:
         # --- server_id 自動採番 ---
         server_id = f"sid{self.num_server:04d}"
 
+        is_windows = platform.system() == "Windows"
+
         try:
-            # APIサーバーを起動し、プロセスをセッション状態に保存
-            # command = ["python", "api_server.py", "--port", str(port)]
-            command = [
-                "python",
-                SUBPROCESS_PROG,
-                "--port",
-                str(port),
-                "--config",
-                config_mode,
-            ]
             if use_package:
-                # package_prog = "dist/api_server/api_server"
-                package_prog = "./api_server"
+                # 1. パッケージ化（exe）実行時のパス解決
+                # Windowsの場合は .exe を付与する
+                prog_name = "api_server.exe" if is_windows else "api_server"
+
+                # カレントディレクトリまたは実行ファイルのある場所を起点にする
+                package_prog = os.path.abspath(
+                    os.path.join(os.getcwd(), prog_name)
+                )
+
                 command = [
                     package_prog,
                     "--port",
@@ -63,18 +61,36 @@ class ProcessManager:
                     "--config",
                     config_mode,
                 ]
+            else:
+                # 2. スクリプト実行時のパス解決
+                # "python" ではなく sys.executable を使うことで、仮想環境等の適切なパスを維持
+                python_exe = sys.executable
 
+                # SUBPROCESS_PROG ("src/api_server.py") を絶対パスに変換
+                script_path = os.path.abspath(SUBPROCESS_PROG)
+
+                command = [
+                    python_exe,
+                    script_path,
+                    "--port",
+                    str(port),
+                    "--config",
+                    config_mode,
+                ]
+
+            # Windows特有の起動フラグ（コンソールウィンドウを表示させない等）が必要な場合は launch_local 内で調整
             process = self.launch_local(command)
 
             self.servers[server_id] = ProcessInfo(
                 server_id, process, port, config_mode
             )
-            # st.session_state.servers = self.servers
-            # st.success(f"API Server started on port {port}")
             return True
+
         except Exception as e:
-            # st.error(f"API Server failed to start: {e}")
-            raise f"API Server failed to start: {e}"
+            # エラーメッセージを詳細化してレイズ
+            error_msg = f"API Server failed to start on port {port}: {str(e)}"
+            # AppLoggerを通じてログにも記録することを推奨
+            raise RuntimeError(error_msg)
 
     def stop_server(self, server_id: str):
         info = self.servers.get(server_id)
