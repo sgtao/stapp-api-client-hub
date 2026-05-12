@@ -1,10 +1,15 @@
 """
-src/pages/*.py の各ファイルについて、
-ローカルimportを再帰的に解析して依存ファイルパスを出力するスクリプト。
+指定ファイルのローカルimportを再帰的に解析して依存ファイルパスを出力するスクリプト。
 
 Usage:
-    python 00_references/list_page_dependencies.py
-    python 00_references/list_page_dependencies.py --page 11_simple_api_client.py
+    # 指定ファイルの依存関係を表示
+    python scripts/list_page_dependencies.py ./src/pages/11_simple_api_client.py
+
+    # 複数ファイル指定
+    python scripts/list_page_dependencies.py ./src/pages/11_simple_api_client.py ./src/pages/12_config_api_client.py
+
+    # 引数なし: src/ 配下の全 .py ファイルを対象
+    python scripts/list_page_dependencies.py
 """
 
 import ast
@@ -67,26 +72,27 @@ def print_dependencies(page_file: Path) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="src/pages/*.py の依存ファイル一覧を表示")
+    parser = argparse.ArgumentParser(
+        description="指定ファイルのローカルimport依存関係を再帰的に表示。引数なしは src/ 配下の全 .py を対象。"
+    )
     parser.add_argument(
-        "--page",
-        metavar="FILENAME",
-        help="対象ページファイル名 (例: 11_simple_api_client.py)。省略時は全ページ。",
+        "files",
+        nargs="*",
+        metavar="FILE",
+        help="対象ファイルの相対/絶対パス。省略時は src/ 配下の全 .py ファイル。",
     )
     args = parser.parse_args()
 
-    pages_dir = SRC_ROOT / "pages"
-
-    if args.page:
-        targets = [pages_dir / args.page]
+    if args.files:
+        targets = [Path(f).resolve() for f in args.files]
     else:
-        targets = sorted(pages_dir.glob("*.py"))
+        targets = sorted(SRC_ROOT.rglob("*.py"))
 
-    for page in targets:
-        if not page.exists():
-            print(f"[ERROR] not found: {page}")
+    for target in targets:
+        if not target.exists():
+            print(f"[ERROR] not found: {target}")
             continue
-        print_dependencies(page)
+        print_dependencies(target)
 
 
 if __name__ == "__main__":
