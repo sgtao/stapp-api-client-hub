@@ -27,6 +27,12 @@ class AppLogger:
         self.logger = logging.getLogger(name)
         self.setup_logger()
 
+    def close_handlers(self):
+        """ファイルハンドラーを明示的に閉じる（Windows でのリネーム前に必要）"""
+        for handler in self.logger.handlers[:]:
+            handler.close()
+            self.logger.removeHandler(handler)
+
     def setup_logger(self):
         # 既存のハンドラーを削除
         for handler in self.logger.handlers[:]:

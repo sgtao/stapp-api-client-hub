@@ -50,12 +50,13 @@ def rotate_log_file(log_file_path, app_logger):
     """
     new_log_file_path = None
     try:
-        # 新しいファイル名を生成
         now = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
         new_log_file_path = f"{log_file_path.replace('.log', '')}_{now}.log"
 
         app_logger.info_log(f"rotate log file to {new_log_file_path}.")
         # ファイルをリネーム
+        # Windows ではハンドラーを閉じてからでないと PermissionError になる
+        app_logger.close_handlers()
         os.rename(log_file_path, new_log_file_path)
 
         st.success(f"Log file rotated to {new_log_file_path}")
@@ -78,7 +79,7 @@ def render_viewer_controller(app_logger):
             icon="🔃",
         ):
             rotated_filename = rotate_log_file(log_file_path, app_logger)
-            if rotate_log_file is not None:
+            if rotated_filename is not None:
                 # app_logger.logger.removeHandler()
                 # app_logger.setup_logger(APP_TITLE)
                 app_logger = AppLogger(APP_TITLE)
