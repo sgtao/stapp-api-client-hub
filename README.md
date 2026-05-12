@@ -1,150 +1,113 @@
 # stapp-api-client-hub
-- 様々なAPIサービスへ接続する [streamlit](https://streamlit.io/)アプリ
 
-## Usage
-- [poetry cli](https://python-poetry.org/docs/)を利用する
+様々な API サービスへ接続・テストするための [Streamlit](https://streamlit.io/) アプリ。
+YAML 設定ファイルでリクエストをプリセット化し、LLM チャット・アクション連鎖実行・ログ管理まで一元操作できる。
 
-### Setup
+## 機能一覧（ページ構成）
+
+| ページ | 概要 |
+|---|---|
+| `11` Simple API Client | HTTP メソッド・URI・ヘッダーを手動入力して API を叩く基本クライアント |
+| `12` Config API Client | YAML プリセットをロードしてワンクリックでリクエスト送信 |
+| `13` Chat with Config | YAML 設定 + LLM API を使ったチャット UI |
+| `21` API Server Control | ローカル FastAPI サーバーの起動・停止・テストを GUI 操作 |
+| `22` Serviced API Client | 起動済み API サーバー経由でリクエストを送信 |
+| `23` Action Config Client | YAML で定義したアクションを連鎖実行（`request` → `extract` → `append_message`） |
+| `24` Chat with Actions | アクション連鎖 + チャット履歴を統合した上位チャット UI |
+| `91` Logs Viewer | API 通信ログの閲覧・ローテート管理 |
+
+## セットアップ
+
+[Poetry](https://python-poetry.org/docs/) で依存パッケージをインストールする。
+
 ```sh
 poetry install
+```
 
-# start poetry virtual env.
-## poetry shell # for poetry 1.x version
+### API キーの設定
 
-## Bash/Zsh/Csh # for poetry 2.x version
+サイドバーの入力欄から UI 上で設定するか、環境変数 `API_KEY` で起動前に渡すことができる。  
+環境変数が設定されている場合は起動時に自動的に読み込まれる（優先順位: UI入力値 > 環境変数）。
+
+```sh
+# Bash / Zsh
+export API_KEY="your_api_key_here"
+
+# PowerShell
+$env:API_KEY = "your_api_key_here"
+```
+
+> **補足**: YAML 設定ファイルに保存する際、API キーは自動的に `＜API_KEY＞` にマスクされる。
+
+### 仮想環境の有効化
+
+```sh
+# Bash / Zsh / Csh（Poetry 2.x）
 eval $(poetry env activate)
 
-## Powershell
+# PowerShell（Poetry 2.x）
 Invoke-Expression (poetry env activate)
-## Fish
+
+# Fish（Poetry 2.x）
 eval (poetry env activate)
 
-# when finish poetry virtual env.
+# 終了
 deactivate
 ```
 
-### コマンド一覧
-- [pyproject.toml](./pyproject.toml) の `[tool.taskipy.tasks]` 定義より：
-```sh
-$ task --list
-run                 streamlit run src/main.py
-test                pytest tests
-test-cov            pytest tests --cov --cov-branch -svx
-test-report         pytest tests --cov --cov-report=html
-format              black --line-length 79 src
-lint                flake8 src
-check-format        run lint check after format
-export-requirements export requirements.txt file
-export-req-with-dev export requirements-dev.txt file
-rm-dist             remove build and dist directory
-make-dist           make distribution package
-```
+## 起動
 
-### Start as local service
 ```sh
-# on poetry env.
-# streamlit hello
 task run
-# streamlit run src/main.py
-# Local URL: http://localhost:8501
+# → streamlit run src/main.py
+# → http://localhost:8501
 ```
 
+## よく使うタスク
 
-### format and lint check
 ```sh
-# task format
-# task lint
-task check-format
+task --list          # 全タスク一覧
+
+task check-format    # black フォーマット + flake8 lint を一括実行
+task test            # pytest でテスト実行
+task test-cov        # C1 カバレッジを表示
+task test-report     # HTML カバレッジレポートを出力
 ```
 
+## 配布パッケージのビルド（Python 不要で実行できるバイナリ）
 
-### Test with `pytest`
-- [streamlitのテスト手法](https://docs.streamlit.io/develop/concepts/app-testing/get-started)を参考にテストを実施
 ```sh
-# on poetry env
-# pytest tests/test_main.py
-task test
-```
+task make-dist       # dist/ 以下にパッケージを生成
+task rm-dist         # dist/ を削除
 
-### Test coverage
-
-#### show c1 coverage
-```sh
-# on poetry env
-task test-cov
-```
-
-#### output HTML coverage report
-```sh
-# on poetry env
-task test-report
-```
-
-### Export `requirements.txt` file
-
-- export `requirements.txt` file of only `[tool.poetry.dependencies]` packages
-```sh
-# on poetry env
-task export-requirements
-```
-
-- export `requirements.txt` file of `[tool.poetry.dependencies]` and `[tool.poetry.group.dev.dependencies]` packages
-```sh
-# on poetry env
-task export-req-with-dev
-```
-
-### Build Docker image and run
-```sh
-# Build Docker image
-sudo task docker-build
-
-# run docker container
-sudo task docker-run
-```
-
-#### priviredge setting:
-- to execute docker command without sudo, set following:
-```sh
-sudo usermod -aG docker $USER
-newgrp docker
-```
-
-### make packages
-- make package file under dist for run stapp without Python
-```sh
-# make distribution package on poetry env
-task make-dist
-```
-
-- clear package
-```sh
-# remove distribution package on poetry env
-task rm-dist
-```
-
-- run package
-```sh
-# run package without poetry env
+# 生成したバイナリの実行（Linux）
 ./dist/run_stapp/run_stapp
 ```
 
-## 使用ライブラリ
+> **注意**: PyInstaller はクロスコンパイル非対応。ターゲット OS 上でビルドすること。
 
-このプロジェクトは以下のオープンソースライブラリを使用しています：
+## requirements.txt のエクスポート
 
-- [Streamlit](https://streamlit.io/) - Apache License 2.0
+```sh
+task export-requirements      # 本番依存のみ
+task export-req-with-dev      # 開発依存を含む
+```
 
-  Copyright © 2019-2024 Streamlit Inc.
+## プロジェクト構成
 
-  Streamlitは、データアプリケーションを簡単に作成するためのオープンソースライブラリです。
+```
+src/
+├── main.py          # エントリーポイント（ホーム画面）
+├── pages/           # 各ページ（オーケストレーター層）
+├── ui/              # Streamlit UI コンポーネント層
+├── logic/           # UI 非依存のビジネスロジック層
+└── api/             # FastAPI サーバー定義
+assets/              # YAML プリセット設定ファイル
+tests/               # pytest テストスイート
+```
 
 ## ライセンス
 MIT License
+詳細は [LICENSE](./LICENSE) を参照。
 
-このプロジェクトは MIT ライセンスの下で公開されています。詳細は [LICENSE](./LICENSE) ファイルをご覧ください。
-
-ただし、このプロジェクトは Apache License 2.0 でライセンスされている Streamlit を使用しています。
-Streamlit のライセンス全文は [こちら](https://github.com/streamlit/streamlit/blob/develop/LICENSE) でご確認いただけます。
-
------
+ただし、本プロジェクトは Apache License 2.0 の [Streamlit](https://github.com/streamlit/streamlit/blob/develop/LICENSE) を使用してます。
