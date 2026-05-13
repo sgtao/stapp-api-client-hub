@@ -41,7 +41,7 @@ class AppLogger:
         self.logger.setLevel(self.log_level)
 
         # ファイルハンドラー
-        file_handler = logging.FileHandler(self.log_file)
+        file_handler = logging.FileHandler(self.log_file, encoding="utf-8")
         file_handler.setLevel(self.log_level)
 
         # フォーマッター

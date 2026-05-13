@@ -35,7 +35,7 @@ def render_log_selector(app_logger):
 # ログファイル表示関数
 def display_log(log_file_path):
     try:
-        with open(log_file_path, "r") as f:
+        with open(log_file_path, "r", encoding="utf-8") as f:
             log_contents = f.read()
         st.text(log_contents)
     except FileNotFoundError:
