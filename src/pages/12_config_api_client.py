@@ -106,7 +106,7 @@ def main():
             body_json = json.loads(sent_body) if request_body else None
 
             response = api_requestor.send_request(
-                sent_uri, method, header_dict, body_json
+                sent_uri, method, header_dict, body_json, timeout=90,
             )
 
             if response:
