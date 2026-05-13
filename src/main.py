@@ -41,7 +41,7 @@ st.page_link(
     icon="🏃",
 )
 st.page_link(
-    "pages/24_chat_with_actions.py",
+    "pages/31_chat_with_actions.py",
     label="Go to Chatbot with Action Config page",
     icon="💬",
 )
