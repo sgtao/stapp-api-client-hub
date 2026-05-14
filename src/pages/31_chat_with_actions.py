@@ -324,7 +324,7 @@ def main():
             # 最終ステップの結果を回答として取得
             st.session_state.results = results
             # answer = results[0].get("result")
-            answer = results[-3]
+            answer = results[-2]
             st.session_state.summary_chat = results[-1]
 
         # 5. 回答の表示と保存

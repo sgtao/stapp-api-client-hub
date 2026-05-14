@@ -14,6 +14,9 @@ action_config:
 - type: append_message
   role: "assistant"
   content: "＜action_result_0＞"
+- type: extract
+  target: "messages"
+  user_property_path: messages[-1].content
 - type: request
   config_file: assets/single/202_summarize_messages.yaml
   method: POST
