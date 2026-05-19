@@ -15,7 +15,7 @@ class ApiRequestor:
         # self.logger = logging.getLogger(__name__)
         self.api_logger = AppLogger(__name__)
 
-    def send_request(self, url, method, headers=None, body=None, timeout=30):
+    def send_request(self, url, method, headers=None, body=None, timeout=120):
         """
         汎用的なAPIリクエストメソッド
         APIリクエストを送信し、429エラー時にリトライを行う。
