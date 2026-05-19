@@ -110,7 +110,7 @@ def main():
                 method,
                 header_dict,
                 body_json,
-                timeout=90,
+                timeout=120,
             )
 
             if response:

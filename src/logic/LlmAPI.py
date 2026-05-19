@@ -57,7 +57,7 @@ class LlmAPI:
             headers=headers,
             # json=payload,
             body=payload,
-            timeout=90,
+            timeout=120,
         )
         response.raise_for_status()
         return response
