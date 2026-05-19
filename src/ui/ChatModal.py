@@ -5,7 +5,18 @@ import streamlit as st
 
 
 class ChatModal:
-    @st.dialog("Chat Modal.", width="large")
+    def __init__(self):
+        if "messages" not in st.session_state:
+            st.session_state.messages = []
+        if "system_prompt" not in st.session_state:
+            st.session_state.system_prompt = ""
+        if "text_message" not in st.session_state:
+            st.session_state.text_message = ""
+        if "summary_chat" not in st.session_state:
+            st.session_state.summary_chat = ""
+
+    # @st.dialog("Chat Modal.", width="large")
+    @st.dialog("Chat Modal.", width="medium")
     def modal(self, type, messages=[]):
         st.write(f"Modal for {type}:")
         if type == "copy_response":
@@ -17,6 +28,8 @@ class ChatModal:
             self._modal_closer()
         elif type == "clear_session":
             self.confirm_clear_session()
+        elif type == "clear_messages":
+            self.confirm_clear_messages()
         else:
             st.write("No Definition.")
 
@@ -67,5 +80,23 @@ class ChatModal:
             if st.button("Clear", type="primary"):
                 # 全てのセッション状態をクリアする
                 st.session_state.clear()
+                time.sleep(1)
+                st.rerun()
+
+    def confirm_clear_messages(self):
+        st.subheader("Clear Messages?")
+        st.code(
+            "チャットを初期化します（systemprompt含め削除）。よろしいですか？"
+        )
+        col_l, col_r = st.columns(2)
+        with col_l:
+            self._modal_closer()
+        with col_r:
+            if st.button("Clear", type="primary"):
+                # Messageに関する状態をクリアする
+                st.session_state.summary_chat = ""
+                st.session_state.system_prompt = ""
+                st.session_state.text_message = ""
+                st.session_state.messages = []
                 time.sleep(1)
                 st.rerun()

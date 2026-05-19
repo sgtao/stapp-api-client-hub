@@ -352,10 +352,10 @@ def main():
 
     with cols[1]:
         if st.button(
-            help="Clear Session States",
-            label="🛀",
+            help="Clear Messages",
+            label="🆑",
         ):
-            ChatModal().modal(type="clear_session")
+            ChatModal().modal(type="clear_messages")
     with cols[2]:
         pass
     with cols[3]:
