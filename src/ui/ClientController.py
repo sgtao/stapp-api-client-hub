@@ -238,21 +238,21 @@ class ClientController:
             ):
                 self._clear_states()
                 st.rerun()
+        # with col2:
+        #     if st.button(
+        #         help="Save Session States",
+        #         label="📥",
+        #         disabled=st.session_state.api_running,
+        #     ):
+        #         self.modal("save_state")
+        # with col3:
+        #     if st.button(
+        #         help="Load Session States",
+        #         label="📤",
+        #         disabled=st.session_state.api_running,
+        #     ):
+        #         self.modal("load_state")
         with col2:
-            if st.button(
-                help="Save Session States",
-                label="📥",
-                disabled=st.session_state.api_running,
-            ):
-                self.modal("save_state")
-        with col3:
-            if st.button(
-                help="Load Session States",
-                label="📤",
-                disabled=st.session_state.api_running,
-            ):
-                self.modal("load_state")
-        with col4:
             if st.button(
                 help="Clear Session States",
                 label="🛀",
@@ -260,6 +260,10 @@ class ClientController:
                 # 全てのセッション状態をクリアする場合はこちらを使用
                 st.session_state.clear()
                 st.rerun()
+        with col3:
+            pass
+        with col4:
+            pass
         with col5:
             pass
 
