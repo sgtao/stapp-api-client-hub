@@ -45,7 +45,7 @@ def main():
     # )
     # config_files = ConfigFiles(config_mode=config_mode)
     config_files = ConfigFiles()
-    config_files.render_config_mode(mode_options=["default", "single", "test"])
+    config_files.render_config_mode(mode_options=["single", "test", "default"])
 
     if not config_files:
         st.warning(

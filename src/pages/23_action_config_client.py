@@ -60,7 +60,7 @@ def main():
             if config_title:
                 st.write(f"##### Title: {config_title}")
             if config_note:
-                st.info(f"Note: {config_title}")
+                st.info(f"Note: {config_note}")
 
             cols = st.columns(4)
             with cols[0]:
