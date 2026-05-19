@@ -11,6 +11,7 @@ def config_mode_selector(
     return st.radio(
         "Which config file mode(other than default are subfolder)",
         options=mode_options,
-        index=0,
+        # index=0,
+        index=1,  # for packaged app, default to 'single' mode
         horizontal=True,
     )
