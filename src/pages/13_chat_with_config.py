@@ -6,7 +6,7 @@ import streamlit as st
 from ui.ApiRequestHeader import ApiRequestHeader
 from ui.ApiRequestInputs import ApiRequestInputs
 from ui.ChatMessage import ChatMessage
-from ui.ChatModal import ChatModal
+from ui.ChatToolbar import ChatToolbar
 from ui.ClientController import ClientController
 from ui.ConfigFiles import ConfigFiles
 from ui.SideMenus import SideMenus
@@ -62,6 +62,7 @@ def main():
     api_request_inputs = ApiRequestInputs()
 
     message = ChatMessage()
+    chat_toolbar = ChatToolbar()
     config_process = ConfigProcess()
 
     # assets/privatesフォルダからyamlファイルを選択
@@ -168,25 +169,7 @@ def main():
                 st.rerun()
 
     # page footer
-    cols = st.columns(5)
-    with cols[0]:
-        if st.button(
-            label="",
-            help="Copy Response",
-            icon="📋",
-        ):
-            ChatModal().modal(
-                type="copy_response", messages=message.get_messages()
-            )
-
-    with cols[1]:
-        pass
-    with cols[2]:
-        pass
-    with cols[3]:
-        pass
-    with cols[4]:
-        pass
+    chat_toolbar.render_footer()
 
 
 # render page
