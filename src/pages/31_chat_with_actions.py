@@ -5,7 +5,7 @@ import time
 import streamlit as st
 
 from ui.ChatMessage import ChatMessage
-from ui.ChatModal import ChatModal
+from ui.ChatToolbar import ChatToolbar
 from ui.InputSupporter import InputSupporter
 from ui.SideMenus import SideMenus
 
@@ -49,6 +49,7 @@ def main():
     # chat_manager = ChatMessage()
     chat_service = ChatService()
     message = ChatMessage()
+    chat_toolbar = ChatToolbar()
     # Setup to access API-Server
     config_file_path = CONFIG_WO_IMAGE
     action_configs = chat_service.read_action_config(config_file_path)
@@ -172,40 +173,7 @@ def main():
         st.rerun()
 
     # page footer
-    cols = st.columns(5)
-    with cols[0]:
-        if st.button(
-            label="Copy Msg.",
-            help="Copy Response",
-            icon="📋",
-        ):
-            ChatModal().modal(
-                type="copy_response",
-                messages=message.get_messages(),
-                summary=st.session_state.summary_chat,
-            )
-    with cols[1]:
-        if st.button(
-            label="Save Msg.",
-            help="Save Chat History",
-            icon="📥",
-        ):
-            ChatModal().modal(
-                type="save_chat",
-                messages=message.get_messages(),
-                summary=st.session_state.summary_chat,
-            )
-    with cols[2]:
-        if st.button(label="Load Msg.", help="Load Chat History", icon="📤"):
-            ChatModal().modal(type="load_chat")
-    with cols[3]:
-        pass
-    with cols[4]:
-        if st.button(
-            label="🆑 Clear Msg.",
-            help="Clear Messages",
-        ):
-            ChatModal().modal(type="clear_messages")
+    chat_toolbar.render_footer()
 
 
 if __name__ == "__main__":
