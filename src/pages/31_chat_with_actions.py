@@ -38,11 +38,10 @@ def main():
 
     st.header(f"💬+🏃 {APP_TITLE}")
     st.info(
-        """会話履歴を要約を使ってチャットします。\n
-    - `assets/actions/102_chat_with_response_summary.yaml`を利用します\n
-    - 画像添付すると`assets/actions/112_chat_with_image_explation.yaml`を利用します\n
-    - 事前に3000 port で `single` config のAPI-Serverを起動して下さい
-    - サイドメニューの`user_input`は無視されます
+        """会話履歴の要約をしながらチャットできます。\n
+    - 事前に`3000`port +`single` でAPI-Serverを起動して下さい。`user_input`は無視されます
+    - 画像なし：`assets/actions/102_chat_with_response_summary.yaml` 利用
+    - 画像添付す：`assets/actions/112_chat_with_image_explation.yaml`利用
     """
     )
     # 1. セッション状態の初期化 [14-16]
@@ -176,7 +175,7 @@ def main():
     cols = st.columns(5)
     with cols[0]:
         if st.button(
-            label="",
+            label="Copy Msg.",
             help="Copy Response",
             icon="📋",
         ):
@@ -185,19 +184,28 @@ def main():
                 messages=message.get_messages(),
                 summary=st.session_state.summary_chat,
             )
-
     with cols[1]:
         if st.button(
-            help="Clear Messages",
-            label="🆑",
+            label="Save Msg.",
+            help="Save Chat History",
+            icon="📥",
         ):
-            ChatModal().modal(type="clear_messages")
+            ChatModal().modal(
+                type="save_chat",
+                messages=message.get_messages(),
+                summary=st.session_state.summary_chat,
+            )
     with cols[2]:
-        pass
+        if st.button(label="Load Msg.", help="Load Chat History", icon="📤"):
+            ChatModal().modal(type="load_chat")
     with cols[3]:
         pass
     with cols[4]:
-        pass
+        if st.button(
+            label="🆑 Clear Msg.",
+            help="Clear Messages",
+        ):
+            ChatModal().modal(type="clear_messages")
 
 
 if __name__ == "__main__":

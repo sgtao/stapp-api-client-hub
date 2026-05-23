@@ -1,5 +1,6 @@
 # ChatModal.py
-# ui/ChatModalUI.py
+from datetime import datetime
+import yaml
 import time
 import streamlit as st
 
@@ -30,6 +31,12 @@ class ChatModal:
             self.confirm_clear_session()
         elif type == "clear_messages":
             self.confirm_clear_messages()
+        elif type == "save_chat":
+            self.save_chat_history(messages, summary=summary)
+            self._modal_closer()
+        elif type == "load_chat":
+            self.load_chat_history()
+            self._modal_closer()
         else:
             st.write("No Definition.")
 
@@ -105,3 +112,60 @@ class ChatModal:
                 st.session_state.messages = []
                 time.sleep(1)
                 st.rerun()
+
+    # 『Save Chat History』モーダル：
+    def save_chat_history(self, messages, summary=""):
+        system_prompt = ""
+        if "system_prompt" in st.session_state:
+            system_prompt = st.session_state.system_prompt
+
+        time_stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+        file_name = f"{time_stamp}_chatHistory.yaml"
+        data = {
+            "time_stamp": time_stamp,
+            "messages": messages,
+            "summary_chat": summary,
+            "system_prompt": system_prompt,
+        }
+        chat_yaml = yaml.dump(
+            data, allow_unicode=True, default_flow_style=False
+        )
+
+        with st.expander("Save Chat History", expanded=True):
+            st.code(chat_yaml, height="content", language="yaml")
+
+        st.download_button(
+            label="Download Chat History",
+            data=chat_yaml,
+            file_name=file_name,
+            mime="text/yaml",
+        )
+
+    # 『Load Chat History』モーダル：
+    def load_chat_history(self):
+        uploaded_file = st.file_uploader(
+            label="Choose a Chat History YAML file",
+            type="yaml",
+        )
+        if uploaded_file is not None:
+            try:
+                config = yaml.safe_load(uploaded_file)
+                if config:
+                    loaded_messages = config.get("messages", [])
+                    loaded_summary = config.get("summary_chat", "")
+                    loaded_prompt = config.get("system_prompt", "")
+
+                    st.write(
+                        f"Messages: {len(loaded_messages)} 件, "
+                        f"Summary: {'あり' if loaded_summary else 'なし'}"
+                    )
+
+                    if st.button("ロードを実行", type="primary"):
+                        st.session_state.messages = loaded_messages
+                        st.session_state.summary_chat = loaded_summary
+                        st.session_state.system_prompt = loaded_prompt
+                        st.info("チャット履歴をロードしました")
+                        time.sleep(2)
+                        st.rerun()
+            except yaml.YAMLError as e:
+                st.error(f"YAML解析エラー: {str(e)}")
