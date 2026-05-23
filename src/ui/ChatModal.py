@@ -17,12 +17,12 @@ class ChatModal:
 
     # @st.dialog("Chat Modal.", width="large")
     @st.dialog("Chat Modal.", width="medium")
-    def modal(self, type, messages=[]):
+    def modal(self, type, messages=[], summary=""):
         st.write(f"Modal for {type}:")
         if type == "copy_response":
             if len(messages) > 0:
                 # self.copy_action(message=messages[-1])
-                self.copy_messages(messages)
+                self.copy_messages(messages, summary=summary)
             else:
                 st.warning("Message not found!")
             self._modal_closer()
@@ -46,12 +46,17 @@ class ChatModal:
                 st.write("右上にコピーアイコンがあります👇")
                 st.code(message.get("content", ""))
 
-    def copy_messages(self, messages):
+    def copy_messages(self, messages, summary=""):
         last_message = messages[-1]
         with st.expander("Last message", expanded=False):
             with st.container(horizontal_alignment="right"):
                 st.write("右上にコピーアイコンがあります👇")
                 st.code(last_message.get("content", ""))
+
+        if summary:
+            with st.expander("Chat Summary", expanded=False):
+                with st.container(horizontal_alignment="right"):
+                    st.code(summary)
 
         st.write("---")
         st.write("chat history (展開すると右上にコピーアイコンがあります👇)")

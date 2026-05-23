@@ -181,7 +181,9 @@ def main():
             icon="📋",
         ):
             ChatModal().modal(
-                type="copy_response", messages=message.get_messages()
+                type="copy_response",
+                messages=message.get_messages(),
+                summary=st.session_state.summary_chat,
             )
 
     with cols[1]:
