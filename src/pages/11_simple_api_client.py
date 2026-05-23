@@ -5,6 +5,7 @@ import streamlit as st
 
 from ui.ApiRequestHeader import ApiRequestHeader
 from ui.ApiRequestInputs import ApiRequestInputs
+from ui.ClientController import ClientController
 from ui.ResponseViewer import ResponseViewer
 from ui.SideMenus import SideMenus
 from logic.ApiRequestor import ApiRequestor
@@ -23,6 +24,7 @@ def main():
     request_inputs = ApiRequestInputs()
     response_viewer = ResponseViewer()
     api_requestor = ApiRequestor()
+    client_controller = ClientController()
 
     # ユーザー入力：APIリクエストの指定項目
     method = request_inputs.render_method_selector()
@@ -40,7 +42,7 @@ def main():
     request_body = request_inputs.render_body_input()
 
     # リクエスト送信ボタン
-    if st.button("リクエストを送信"):
+    if st.button("リクエストを送信", type="primary"):
         try:
             # 確定情報のセット
             st.session_state.uri = uri
@@ -77,6 +79,32 @@ def main():
             )
             # 詳細な例外情報を表示
             st.exception(e)
+
+    st.markdown("###### Tool:")
+    cols = st.columns(5)
+    with cols[0]:
+        if st.button(
+            label="Rerun",
+            help="Rerun Streamlit (shortcut: `Ctrl+R`)",
+            icon="🔃",
+        ):
+            st.rerun()
+    with cols[1]:
+        if st.button(
+            label="Save",
+            help="Save Session State",
+            icon="📥",
+        ):
+            client_controller.modal("save_state")
+    with cols[2]:
+        if st.button(
+            label="Load", help="Load Session State", icon="📤"
+        ):
+            client_controller.modal("load_state")
+    with cols[3]:
+        pass
+    with cols[4]:
+        pass
 
 
 if __name__ == "__main__":

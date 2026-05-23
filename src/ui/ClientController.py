@@ -62,7 +62,7 @@ class ClientController:
             file_name_conf = (
                 f"{datetime.now().strftime('%Y%m%d-%H%M%S')}_{pad}"
             )
-            pad = "stappApiClientMessages.yaml"
+            pad = "apiClientSessionState.yaml"
             file_name_msgs = (
                 f"{datetime.now().strftime('%Y%m%d-%H%M%S')}_{pad}"
             )
@@ -127,7 +127,8 @@ class ClientController:
             Dict[str, Any]: 処理済みの設定データ
         """
         try:
-            config = yaml.safe_load(uploaded_yaml, "r", encoding="utf-8")
+            # config = yaml.safe_load(uploaded_yaml, "r", encoding="utf-8")
+            config = yaml.safe_load(uploaded_yaml)
             # st.session_state.user_inputs = []
             # st.session_state.min_user_inputs =
             # _initialize_user_inputs(config)
@@ -210,11 +211,33 @@ class ClientController:
         if uploaded_file is not None:
             try:
                 config = self._load_config(uploaded_file)
-                if config:
-                    # st.session_state.config = config
-                    self.set_session_state(config)
-                    # main_viewer.config_viewer(st.session_state.config)
-                    st.rerun()
+                # ロード内容の確認表示
+                cfg_session_state = config.get("session_state", {})
+                if "single_config" in config:
+                    cfg_session_state = config.get("single_config", {})
+
+                if len(cfg_session_state) == 0:
+                    st.warning(
+                        "session_state / single_config キーが"
+                        "見つかりません。"
+                        f"YAMLのトップキー: {list(config.keys())}"
+                    )
+                    return
+
+                if st.button("ロードを実行", type="primary"):
+                    with st.spinner("Loading..."):
+                        st.write("ロード内容の確認:")
+                        for key, value in cfg_session_state.items():
+                            st.write(f"  {key}: {value}")
+                        self.set_session_state(config)
+                        st.info("セッション状態をロードしました")
+                        time.sleep(1)
+                        st.rerun()
+                # if config:
+                #     # st.session_state.config = config
+                #     self.set_session_state(config)
+                #     # main_viewer.config_viewer(st.session_state.config)
+                #     st.rerun()
             except yaml.YAMLError as e:
                 st.error(f"Error loading YAML file: {e}")
 
