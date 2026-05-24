@@ -97,10 +97,11 @@ def main():
         ):
             client_controller.modal("save_state")
     with cols[2]:
-        if st.button(
-            label="Load", help="Load Session State", icon="📤"
-        ):
-            client_controller.modal("load_state")
+        # if st.button(
+        #     label="Load", help="Load Session State", icon="📤"
+        # ):
+        #     client_controller.modal("load_state")
+        pass
     with cols[3]:
         pass
     with cols[4]:
