@@ -22,7 +22,8 @@ CONFIG_WITH_IMAGE = "assets/actions/210_chat_with_image_explation.yaml"
 
 
 def initial_session_state():
-    # セッション状態の初期化
+    if "messages" not in st.session_state:
+        st.session_state.messages = []
     if "results" not in st.session_state:
         st.session_state.results = []
     if "system_prompt" not in st.session_state:
@@ -87,6 +88,8 @@ def main():
     if supporter_state.get("has_image", False):
         st.image(supporter_state.get("image_data", None))
 
+    # 4. アクションAPIの実行：YAMLの指示に従ったAPI連鎖実行
+    #  (一時表示されるエラーを解消する場合、後述の代替コードを利用下さい）
     with st.form(key="prompt_form", clear_on_submit=True):
         prompt = st.text_area(
             label="User Message (Max. 4,000 chars.)",
@@ -99,9 +102,22 @@ def main():
         submit_button = st.form_submit_button(
             label="submit",
             type="primary",
-            disabled=False if prompt != "" else True,
             icon="🏃",
         )
+
+    # alternative code
+    # prompt = st.text_area(
+    #     label="User Message (Max. 4,000 chars.)",
+    #     placeholder="Please input message , and press `submit`",
+    #     value=st.session_state.text_message,
+    #     max_chars=4000,
+    # )
+    # submit_button = st.button(
+    #     label="submit",
+    #     type="primary",
+    #     disabled=False if prompt != "" else True,
+    #     icon="🏃",
+    # )
 
     if submit_button:
         if prompt == "":
