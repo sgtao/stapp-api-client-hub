@@ -97,7 +97,7 @@ class InputSupporter:
 
                     # 追記するフォーマットを作成
                     # f-string内のインデントが反映されないよう左寄せにするのがコツです
-                    append_text = f"\n---\n{clean_transcript}\n"
+                    append_text = f"\n{clean_transcript}\n---\n"
 
                     # セッション状態を更新
                     st.session_state.text_message = previous_msg + append_text

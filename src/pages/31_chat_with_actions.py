@@ -96,7 +96,12 @@ def main():
         )
 
         # if st.button("submit", icon="🏃"):
-        submit_button = st.form_submit_button(label="submit", icon="🏃")
+        submit_button = st.form_submit_button(
+            label="submit",
+            type="primary",
+            disabled=False if prompt != "" else True,
+            icon="🏃",
+        )
 
     if submit_button:
         if prompt == "":
