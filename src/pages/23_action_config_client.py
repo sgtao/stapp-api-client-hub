@@ -64,7 +64,16 @@ def main():
 
             cols = st.columns(4)
             with cols[0]:
-                if st.button("Set Config", type="primary"):
+                # if st.button("Set Config", type="primary"):
+                if st.button(
+                    label="Set Config",
+                    type=(
+                        "primary"
+                        if st.session_state.config_file == ""
+                        else "secondary"
+                    ),
+                    icon="📁",
+                ):
                     st.session_state.config_file = config_file_path
                     api_client.clr_api_response()
                     st.rerun()
@@ -95,7 +104,7 @@ def main():
                     if st.button("Rerun (`R`)", icon="🔃"):
                         st.rerun()
                 with cols[1]:
-                    if st.button("Start actions", type="secondary", icon="🏃"):
+                    if st.button("Start actions", type="primary", icon="🏃"):
                         st.session_state.user_input_text_area = user_message
                         # APIリクエスト作成・送信
                         action_configs = chat_service.read_action_config(
@@ -126,7 +135,8 @@ def main():
                     pass
                 with cols[3]:
                     if st.button("Clear", icon="🆑"):
-                        st.session_state.user_input_text_area = ""
+                        # st.session_state.user_input_text_area = ""
+                        st.session_state.clear()
                         st.rerun()
 
             except Exception as e:

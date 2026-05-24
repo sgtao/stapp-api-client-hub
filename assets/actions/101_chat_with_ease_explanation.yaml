@@ -1,6 +1,6 @@
 title: 101_chat_with_ease_explanation.yaml
 note: |
-  - gpt-oss-20bとのチャットで返答を常にファインマンテクニックで解説する
+  - gpt-oss-20bとのチャットで送信した内容をファインマンテクニックで解説します
 action_config:
 - type: request
   config_file: assets/single/002_submit_user_message.yaml
