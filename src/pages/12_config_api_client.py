@@ -61,7 +61,11 @@ def main():
         config = config_files.load_config_from_yaml(selected_config_file)
         config_files.render_config_viewer(selected_config_file, config)
 
-    if st.button(label="Load Config File", icon="📤"):
+    if st.button(
+        label="Load Config File",
+        icon="📤",
+        type="secondary" if st.session_state.config_loaded else "primary",
+    ):
         # 読み込んだコンフィグをセッションステートに適用
         client_controller.set_session_state(config)
         st.session_state.config_loaded = True
@@ -86,6 +90,7 @@ def main():
     if st.button(
         "リクエストを送信",
         disabled=not st.session_state.config_loaded,
+        type="primary",
     ):
         try:
             # URIとリクエストボディのJSON形式検証
