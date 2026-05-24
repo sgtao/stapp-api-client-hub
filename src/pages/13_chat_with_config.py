@@ -67,7 +67,7 @@ def main():
 
     # assets/privatesフォルダからyamlファイルを選択
     config_mode = config_mode_selector(
-        mode_options=["default", "single", "test"]
+        mode_options=["single", "test", "default"]
     )
     config_files = ConfigFiles(config_mode=config_mode)
 
@@ -87,7 +87,11 @@ def main():
     # Load Config and show Request settings
     col1, col2, col3 = st.columns(3)
     with col1:
-        if st.button("Load Config File", icon="📤"):
+        if st.button(
+            label="Load Config File",
+            type="secondary" if st.session_state.config_loaded else "primary",
+            icon="📤",
+        ):
             # 読み込んだコンフィグをセッションステートに適用
             client_controller.set_session_state(config)
             config_process.set_config(config)
@@ -106,7 +110,11 @@ def main():
                 request_inputs=api_request_inputs,
             )
     with col3:
-        if st.button("Clear Session States", icon="🔄"):
+        if st.button(
+            label="Clear Session States",
+            help="Clear whole session states and restart the app.",
+            icon="🔄",
+        ):
             # 全てのセッション状態をクリアする場合はこちらを使用
             st.session_state.clear()
             st.rerun()
