@@ -43,7 +43,15 @@ def main():
             # Render selected config tilte and note
             config_api_selector.render_config_title(config_file)
 
-            if st.button("Set Config", type="primary"):
+            if st.button(
+                label="Set Config",
+                type=(
+                    "primary"
+                    if st.session_state.config_file == ""
+                    else "secondary"
+                ),
+                icon="📁",
+            ):
                 st.session_state.config_file = config_file
                 api_client.clr_api_response()
 
@@ -62,12 +70,10 @@ def main():
             col1, col2, col3, col4 = st.columns(4)
             try:
                 with col1:
-                    if st.button("Rerun (`R`)", icon="🔃"):
+                    if st.button("Rerun (`R`)", icon="🔃", type="secondary"):
                         st.rerun()
                 with col2:
-                    if st.button(
-                        "Request single", type="secondary", icon="🚀"
-                    ):
+                    if st.button("Single", type="primary", icon="🚀"):
                         # APIリクエスト送信
                         uri = request_inputs.make_uri(path="/api/v0/single")
                         api_response = api_client.post_api_server(
@@ -75,9 +81,7 @@ def main():
                             config_file=st.session_state.config_file,
                         )
                 with col3:
-                    if st.button(
-                        "Request message", type="secondary", icon="🎟️"
-                    ):
+                    if st.button("Message", type="primary", icon="🎟️"):
                         # APIリクエスト送信
                         if user_message != "":
                             messages.append(
@@ -90,9 +94,7 @@ def main():
                             messages=messages,
                         )
                 with col4:
-                    if st.button(
-                        "Request actions", type="secondary", icon="🏃"
-                    ):
+                    if st.button("Action", type="secondary", icon="🏃"):
                         # APIリクエスト送信
                         if user_message != "":
                             messages.append(
